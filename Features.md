@@ -1,0 +1,28 @@
+- Listen to audio books
+   - Sleep Timer
+      - Custom time input (e.g. 22m)
+      - End of Chapter
+      - End of book
+      - Sensible default times (5m, 10m, 15m, 30m, 1h)
+   - Playback Rate up to 3.5x
+      - Good UX to select the speed
+   - Intuitive UI
+      - Functional Progress Slider
+      - Chapter title visibility and select
+      - Dark/Light theme
+- Multiple Data Sources for Audiobooks
+   - Remote Source (e.g. NAS)
+      - Support Streaming
+      - Support downloading in advanced for network-less playback
+   - Local to device
+
+- Platforms to support
+   - Initial Phase
+      - Android
+      - iOS
+   - Phase 2
+      - Web
+      - Desktop
+         - Linux
+         - Windows
+         - Mac
