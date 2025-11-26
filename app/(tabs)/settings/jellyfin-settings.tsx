@@ -15,20 +15,37 @@ export default function JellyfinSettings() {
   const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleLogin = async () => {
-    dispatch(setJellyfinDomain(domain));
-    let userResponse = await authenticateUserByName(domain, username, password);
-    setErrorMessage('');
+    let message = '';
+    try {
+      message += 'starting process';
+      dispatch(setJellyfinDomain(domain));
+      message += '\nAfter first dispatch';
+      message += `\n${domain};${username};${password}`;
+      // throw new Error('Breakpoint, prior to setItem');
+      let userResponse = await authenticateUserByName(domain, username, password);
+      message += '\nAfter request' + JSON.stringify(userResponse);
+      setErrorMessage('');
+      message += '\nAfter set message';
 
-    if (userResponse.errors) {
-      setErrorMessage(userResponse.errors.message);
-      return;
+      if (userResponse.errors) {
+        message += '\nIn error handling';
+        setErrorMessage(userResponse.errors.message);
+        return;
+      }
+
+      // throw new Error('Breakpoint, prior to setItem' + JSON.stringify(userResponse));
+      message += '\nBefore async storage';
+      await setItemAsync('jellyfinAccessToken', userResponse.accessToken);
+      message += '\nafter first async storage';
+      await setItemAsync('jellyfinUserId', userResponse.user.Id);
+      await setItemAsync('jellyfinDomain', domain);
+      message += '\nafter async storage';
+      dispatch(setAccessToken(userResponse.accessToken));
+      dispatch(setJellyfinUser(userResponse.user));
+      message += '\nafter finished';
+    } catch (error) {
+      setErrorMessage("unable to login \n" + JSON.stringify(error) + message);
     }
-
-    await setItemAsync('jellyfinAccessToken', userResponse.accessToken);
-    await setItemAsync('jellyfinUserId', userResponse.user.Id);
-    await setItemAsync('jellyfinDomain', domain);
-    dispatch(setAccessToken(userResponse.accessToken));
-    dispatch(setJellyfinUser(userResponse.user));
   };
 
   const disconnectJellyfin = async () => {
@@ -46,6 +63,7 @@ export default function JellyfinSettings() {
       <View>
         <Text style={{ color: PALETTE.text }}>Jellyfin</Text>
         {jellyfinProvider.jellyfinAccessToken && (<Text style={{ color: PALETTE.text }}>Connected</Text>)}
+        {errorMessage && (<Text style={{ color: PALETTE.text, padding: 12 }}>{errorMessage}</Text>)}
       </View>
       <TextInput style={styles.input} placeholder="Domain" value={domain} onChangeText={setDomain} />
       <TextInput style={styles.input} placeholder="Username" value={username} onChangeText={setUsername} />

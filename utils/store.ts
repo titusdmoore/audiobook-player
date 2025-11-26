@@ -8,8 +8,8 @@ export const store = configureStore({
 		bookProvider: bookProviderReducer,
 		audioPlayer: audioPlayerReducer
 	},
-	devTools: false,
-	enhancers: getDefaultEnhancers => getDefaultEnhancers().concat(devToolsEnhancer()),
+	// devTools: false,
+	// enhancers: getDefaultEnhancers => getDefaultEnhancers().concat(devToolsEnhancer()),
 });
 
 export type AppStore = typeof store;

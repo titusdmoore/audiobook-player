@@ -1,3 +1,5 @@
+import { fetch } from "expo/fetch";
+
 export type AuthenticateUserByNameResponse = {
 	user: any | null;
 	accessToken: string | null;
@@ -5,22 +7,27 @@ export type AuthenticateUserByNameResponse = {
 };
 
 export async function authenticateUserByName(domain: string, username: string, password: string) {
-	let authResponse = await fetch(`${domain}/Users/AuthenticateByName`, {
-		method: 'POST',
-		body: JSON.stringify({ Username: username, Pw: password }),
-		headers: new Headers({
-			'accept': 'application/json',
-			'Content-Type': 'application/json',
-			'x-emby-authorization': 'Mediabrowser Client="audiobook-player", Device="mydevice", DeviceId="myid", Version="1.0.0"'
-		}),
-	});
+	try {
+		let authResponse = await fetch(`${domain}/Users/AuthenticateByName`, {
+			method: 'POST',
+			body: JSON.stringify({ Username: username, Pw: password }),
+			headers: new Headers({
+				'accept': 'application/json',
+				'Content-Type': 'application/json',
+				'x-emby-authorization': 'Mediabrowser Client="audiobook-player", Device="mydevice", DeviceId="myid", Version="1.0.0"'
+			}),
+		});
 
-	if (authResponse && authResponse.ok) {
-		let { User, AccessToken } = await authResponse.json();
-		return { user: User, accessToken: AccessToken };
+		if (authResponse && authResponse.ok) {
+			let { User, AccessToken } = await authResponse.json();
+			return { user: User, accessToken: AccessToken };
+		}
+
+		return { user: null, errors: { message: 'Something went wrong with logging in.' } };
+	} catch (error: any) {
+		// Return error instead of throwing
+		return { user: null, errors: { message: `Fetch failed: ${error.message}` } };
 	}
-
-	return { user: null, errors: { message: 'Something went wrong with logging in.' } };
 }
 
 export async function fetchItem(domain: string, accessToken: string, userId: string, id: string) {
