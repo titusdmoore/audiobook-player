@@ -63,3 +63,17 @@ export type BookChapterDb = {
 	chapter_order: number | null,
 	book_id: number | null,
 }
+
+// JellyfinBookProgress 
+export const JELLYFIN_BOOK_PROGRESS_CREATE = `CREATE TABLE jellyfin_book_progress(
+	id INTEGER PRIMARY KEY NOT NULL,
+	position INTEGER NOT NULL,
+	title_id TEXT NOT NULL,
+	chapter_id TEXT NOT NULL
+);`;
+export type JellyfinBookProgressDb = {
+	id?: number,
+	position: number,
+	title_id: string,
+	chapter_id: string,
+};

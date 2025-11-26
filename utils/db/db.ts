@@ -1,9 +1,10 @@
 import { SQLiteDatabase, SQLiteRunResult } from 'expo-sqlite';
-import { BOOK_CHAPTERS_CREATE, BOOK_PROVIDERS_CREATE, BookChapterDb, BookDb, BOOKS_TABLE_CREATE } from './schema';
+import { BOOK_CHAPTERS_CREATE, BOOK_PROVIDERS_CREATE, BookChapterDb, BookDb, BOOKS_TABLE_CREATE, JELLYFIN_BOOK_PROGRESS_CREATE, JellyfinBookProgressDb } from './schema';
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 	// BUMP IF MIGRATION NEEDED
-	const DATABASE_VERSION = 1;
+	const DATABASE_VERSION = 3;
+	console.log("here")
 
 	let versionResponse = await db.getFirstAsync<{ user_version: number }>(
 		'PRAGMA user_version'
@@ -27,6 +28,15 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 			${BOOK_PROVIDERS_CREATE}
 			${BOOKS_TABLE_CREATE}
 			${BOOK_CHAPTERS_CREATE}
+			${JELLYFIN_BOOK_PROGRESS_CREATE}
+		`);
+	}
+
+	if (currentDbVersion === 2) {
+		await db.execAsync(`
+			PRAGMA journal_mode = 'wal';
+
+			${JELLYFIN_BOOK_PROGRESS_CREATE}
 		`);
 	}
 
@@ -80,3 +90,30 @@ export async function addBookChapter(db: SQLiteDatabase, data: BookChapterDb) {
 		data.book_id
 	);
 }
+
+export async function fetchPlayerDuration(db: SQLiteDatabase, titleId: string): Promise<JellyfinBookProgressDb | null> {
+	return await db.getFirstAsync('SELECT * FROM jellyfin_book_progress WHERE title_id = ?;', titleId)
+}
+
+export async function createTitleDuration(db: SQLiteDatabase, data: JellyfinBookProgressDb) {
+	return await db.runAsync(
+		'INSERT INTO jellyfin_book_progress(position, title_id, chapter_id) VALUES (?, ?, ?);',
+		data.position,
+		data.title_id,
+		data.chapter_id,
+	);
+}
+
+export async function updateTitleDuration(db: SQLiteDatabase, id: number, chapterId: string, position: number) {
+	return await db.runAsync(
+		`UPDATE jellyfin_book_progress
+			SET chapter_id = ?, position = ?
+			WHERE id = ?;
+		`,
+		chapterId,
+		position,
+		id,
+	);
+}
+
+// export async function

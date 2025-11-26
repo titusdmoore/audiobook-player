@@ -7,6 +7,7 @@ enum AudioPlayerSliceState {
 
 const initialAudioPlayerState = {
 	playerInitialized: false,
+	activeTitle: null,
 };
 
 export const initializePlayerThunk = createAsyncThunk(
@@ -26,10 +27,13 @@ export const audioPlayerSlice = createSlice({
 	reducers: {
 		setInitialized: (state, action: PayloadAction<boolean>) => {
 			state.playerInitialized = action.payload;
+		},
+		setActiveTitle: (state, action: PayloadAction<any>) => {
+			state.activeTitle = action.payload;
 		}
 	},
 });
 
-export const { setInitialized } = audioPlayerSlice.actions;
+export const { setInitialized, setActiveTitle } = audioPlayerSlice.actions;
 export default audioPlayerSlice.reducer;
 

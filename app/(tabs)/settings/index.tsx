@@ -7,10 +7,10 @@ import { useSQLiteContext } from "expo-sqlite";
 import { useAppSelector } from "@/utils/hooks";
 import { View, Text, StyleSheet, TouchableOpacity, Button } from "react-native";
 
-function ProviderButton() {
+function ProviderButton({ href, title }: any) {
   return (
-    <Link style={styles.providerButton} href="/settings/dropbox-settings">
-      <Text style={styles.providerButtonText}>Dropbox</Text>
+    <Link style={styles.providerButton} href={href}>
+      <Text style={styles.providerButtonText}>{title}</Text>
     </Link>
   );
 }
@@ -34,7 +34,8 @@ export default function Tab() {
     <View>
       <Text style={{ color: PALETTE.text }}>Hello, Settings</Text>
       <Card title="Providers">
-        <ProviderButton />
+        <ProviderButton title="Dropbox" href="/settings/dropbox-settings" />
+        <ProviderButton title="Jellyfin" href="/settings/jellyfin-settings" />
       </Card>
       <Button
         title="Sync Remote Books"

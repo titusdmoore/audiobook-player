@@ -1,11 +1,13 @@
 import { PALETTE } from "@/utils/colors";
-import { View, Text } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
+import { useAppSelector } from "@/utils/hooks";
 import { Image } from "expo-image";
 import { useEffect } from "react";
 import { getInfoAsync } from "expo-file-system";
+import { Link } from "expo-router";
 
 export default function ListTitleCard({ index, item }: any) {
-	console.log(index, item)
+	// console.log(index, item)
 
 	return (
 		<View style={{ flexDirection: 'row', }} key={index}>
@@ -16,6 +18,25 @@ export default function ListTitleCard({ index, item }: any) {
 			{item.author && (<Text style={{ color: PALETTE.text }}>{item.author}</Text>)}
 			<View>
 			</View>
+		</View>
+	);
+}
+
+export function ListTitleCardJelly({ index, item }: any) {
+	// console.log(index, item)
+	const jellyfinProvider = useAppSelector(state => state.bookProvider);
+
+	return (
+		<View style={{ width: '50%', marginBottom: 24, justifyContent: 'center', alignItems: 'center' }} key={index}>
+			<Link href={{
+				pathname: '/[titleId]',
+				params: { titleId: item.Id }
+			}}>
+				<View style={{ justifyContent: 'center', alignItems: 'center' }}>
+					<Image source={`${jellyfinProvider.jellyfinDomain}/Items/${item.Id}/Images/Primary`} style={{ width: 125, height: 125 }} />
+					<Text style={{ color: PALETTE.text, fontSize: 16, textAlign: 'center' }}>{item.Name}</Text>
+				</View>
+			</Link>
 		</View>
 	);
 }

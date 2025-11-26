@@ -8,6 +8,9 @@ export type BookProviderState = {
 	dropboxAccessToken: string | null;
 	dropboxRefreshToken?: string;
 	dropboxInitialized: boolean;
+	jellyfinUser?: any;
+	jellyfinAccessToken?: string;
+	jellyfinDomain?: string;
 };
 
 const bookProviderInitialState: BookProviderState = {
@@ -25,9 +28,18 @@ const bookProviderSlice = createSlice({
 		},
 		setDropboxInitialized: (state, action: PayloadAction<boolean>) => {
 			state.dropboxInitialized = action.payload;
-		}
+		},
+		setJellyfinUser: (state, action: PayloadAction<any | undefined>) => {
+			state.jellyfinUser = action.payload;
+		},
+		setJellyfinDomain: (state, action: PayloadAction<string | undefined>) => {
+			state.jellyfinDomain = action.payload;
+		},
+		setAccessToken: (state, action: PayloadAction<string | undefined>) => {
+			state.jellyfinAccessToken = action.payload;
+		},
 	}
 });
 
-export const { setDropboxTokens, setDropboxInitialized } = bookProviderSlice.actions;
+export const { setDropboxTokens, setDropboxInitialized, setAccessToken, setJellyfinUser, setJellyfinDomain } = bookProviderSlice.actions;
 export default bookProviderSlice.reducer;

@@ -1,4 +1,4 @@
-import TrackPlayer from "react-native-track-player";
+import TrackPlayer, { Event, PlaybackActiveTrackChangedEvent, PlaybackProgressUpdatedEvent, PlaybackState, State } from "react-native-track-player";
 
 // export async function getCurrentTrackPlayer(): TrackPlayer {
 //

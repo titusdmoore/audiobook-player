@@ -1,16 +1,21 @@
 import { AudiobookPlayerTheme, PALETTE } from '@/utils/colors';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { Link, Stack } from 'expo-router';
 import { useEffect } from 'react';
-import TrackPlayer from 'react-native-track-player';
+import TrackPlayer, { Event, PlaybackActiveTrackChangedEvent, PlaybackProgressUpdatedEvent, PlaybackState, State } from "react-native-track-player";
 import { Provider } from 'react-redux';
 import { store } from '@/utils/store';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks';
-import { setDropboxInitialized, setDropboxTokens } from '@/utils/slices/book-provider-slice';
+import { setAccessToken, setDropboxInitialized, setDropboxTokens, setJellyfinDomain, setJellyfinUser } from '@/utils/slices/book-provider-slice';
 import { DropboxProvider } from '@/utils/book-providers/dropbox';
 import { setInitialized } from '@/utils/slices/audio-player-slice';
 import { SQLiteProvider } from 'expo-sqlite';
 import { migrateDbIfNeeded } from '@/utils/db/db';
+import { Text, TouchableOpacity, View } from 'react-native';
+import startup from '@/utils';
+import { getItemAsync } from 'expo-secure-store';
+import { getUserById } from '@/utils/book-providers/jellyfin';
+import { PlaybackService } from '@/service';
 
 function AppInitializer() {
   const dispatch = useAppDispatch();
@@ -18,7 +23,28 @@ function AppInitializer() {
   const bookProvider = useAppSelector(state => state.bookProvider);
 
   useEffect(() => {
-    TrackPlayer.registerPlaybackService(() => require('../service.js'));
+    TrackPlayer.registerPlaybackService(() => PlaybackService);
+
+    if (!bookProvider.jellyfinAccessToken) {
+      (async () => {
+        let accessToken = await getItemAsync('jellyfinAccessToken');
+        let userId = await getItemAsync('jellyfinUserId');
+        let domain = await getItemAsync('jellyfinDomain');
+
+        if (accessToken && domain) {
+          dispatch(setAccessToken(accessToken));
+          dispatch(setJellyfinDomain(domain));
+
+          if (!bookProvider.jellyfinUser && userId) {
+            let userRes = await getUserById(domain, userId, accessToken);
+
+            if (userRes.ok) {
+              dispatch(setJellyfinUser(await userRes.json()));
+            }
+          }
+        }
+      })().then(() => { });
+    }
 
     if (!bookProvider.dropboxInitialized) {
       (async () => {
@@ -39,10 +65,18 @@ function AppInitializer() {
     }
 
     if (!audioPlayer.playerInitialized) {
-      TrackPlayer.setupPlayer().then(() => {
+      TrackPlayer.setupPlayer({
+        autoHandleInterruptions: true,
+      }).then(() => {
         dispatch(setInitialized(true));
+
+        TrackPlayer.updateOptions({
+          progressUpdateEventInterval: 3
+        }).then(() => { });
       });
+
     }
+
   }, []);
 
   return null;
@@ -57,6 +91,7 @@ export default function RootLayout() {
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="player" options={{ presentation: 'modal', title: 'Player' }} />
+            <Stack.Screen name="[titleId]" options={{ headerShown: true }} />
           </Stack>
         </SQLiteProvider>
       </Provider>
