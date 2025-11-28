@@ -2,7 +2,7 @@ import { AudiobookPlayerTheme, PALETTE } from '@/utils/colors';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Link, Stack } from 'expo-router';
 import { useEffect } from 'react';
-import TrackPlayer, { Event, PlaybackActiveTrackChangedEvent, PlaybackProgressUpdatedEvent, PlaybackState, State } from "react-native-track-player";
+import TrackPlayer, { Capability, Event, PlaybackActiveTrackChangedEvent, PlaybackProgressUpdatedEvent, PlaybackState, State } from "react-native-track-player";
 import { Provider } from 'react-redux';
 import { store } from '@/utils/store';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks';
@@ -71,7 +71,20 @@ function AppInitializer() {
         dispatch(setInitialized(true));
 
         TrackPlayer.updateOptions({
-          progressUpdateEventInterval: 3
+          progressUpdateEventInterval: 3,
+          capabilities: [
+            Capability.Play,
+            Capability.Pause,
+            Capability.SeekTo,
+          ],
+          compactCapabilities: [
+            Capability.Play,
+            Capability.Pause,
+          ],
+          notificationCapabilities: [
+            Capability.Play,
+            Capability.Pause,
+          ],
         }).then(() => { });
       });
 

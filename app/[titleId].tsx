@@ -11,9 +11,13 @@ import { setActiveTitle } from "@/utils/slices/audio-player-slice";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchPlayerDuration } from "@/utils/db/db";
 import { useSQLiteContext } from "expo-sqlite";
+import { formatAudioProgressTime } from "@/utils/audio-player";
 
 function runTimeTicksToDuration(ticks: number): number {
-  return Math.floor(ticks / 1e6);
+  let ms = Math.floor(ticks / 10000);
+  let seconds = Math.floor(ms / 1000);
+
+  return seconds;
 }
 
 export default function TitleView() {
@@ -33,14 +37,15 @@ export default function TitleView() {
     if (!startChapterIndex) {
       let duration = await fetchPlayerDuration(db, titleId as string);
       if (duration) {
-        startChapterIndex = chapters.findIndex((chapter) => chapter.id == duration.chapter_id);
+        console.log('duration', duration, chapters)
+        startChapterIndex = chapters.findIndex((chapter) => chapter.Id == duration.chapter_id);
+        console.log("start Index", startChapterIndex)
       } else {
         startChapterIndex = 0;
       }
     }
 
     for (const chapter of chapters.slice(startChapterIndex)) {
-      // console.log('duration', chapter.RunTimeTicks, runTimeTicksToDuration(chapter.RunTimeTicks))
       let track: Track = {
         id: chapter.Id,
         url: `${jellyfinProvider.jellyfinDomain}/Audio/${chapter.Id}/stream`,

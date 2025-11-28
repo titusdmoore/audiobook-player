@@ -1,4 +1,4 @@
-import { fetch } from "expo/fetch";
+// import { fetch } from "expo/fetch";
 
 export type AuthenticateUserByNameResponse = {
 	user: any | null;
@@ -58,6 +58,7 @@ export async function fetchAudiobooks(domain: string, accessToken: string, limit
 	offset = offset ?? 0;
 
 	let response = await fetch(`${domain}/Items?parentId=${parentId}&limit=${limit}&startIndex=${offset}&enableTotalRecordCount=true&enableImages=true`, {
+		method: 'GET',
 		headers: new Headers({
 			'accept': 'application/json',
 			'Authorization': `MediaBrowser Token="${accessToken}"`

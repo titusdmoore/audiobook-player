@@ -17,10 +17,16 @@ export const PlaybackService = async () => {
     // Seek Changed Due to Duration prevents infinite loop
     if (trackObject && !seekChangedDueToDuration) {
       seekChangedDueToDuration = true;
+      console.log(await db.getAllAsync('SELECT * FROM jellyfin_book_progress WHERE title_id = ?;', trackObject.parentItemId))
+
       let duration = await fetchPlayerDuration(db, trackObject.parentItemId);
       if (event.state == State.Ready && duration) {
         console.log("seeking", trackObject, duration);
-        await TrackPlayer.seekTo(duration.position);
+        console.log("queue", await TrackPlayer.getQueue())
+        await TrackPlayer.play();
+        setTimeout(async () => {
+          await TrackPlayer.seekTo(duration.position);
+        }, 100);
       }
     }
 
@@ -32,14 +38,7 @@ export const PlaybackService = async () => {
     let trackObject = await TrackPlayer.getTrack(event.track);
     let duration = await fetchPlayerDuration(db, trackObject?.parentItemId);
 
-    console.log("setting position", trackObject);
-
     if (!duration) {
-      console.log("new duration", {
-        position: Math.floor(event.position),
-        title_id: trackObject?.parentItemId,
-        chapter_id: trackObject?.id,
-      });
       await createTitleDuration(db, {
         position: Math.floor(event.position),
         title_id: trackObject?.parentItemId,
@@ -48,7 +47,6 @@ export const PlaybackService = async () => {
       return;
     }
 
-    console.log("existing duration", duration)
     await updateTitleDuration(db, duration.id!, trackObject?.id, Math.floor(event.position));
   });
 };

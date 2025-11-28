@@ -19,10 +19,12 @@ export default function Tab() {
   const db = useSQLiteContext();
   const dropboxProvider = useAppSelector(state => state.bookProvider);
 
+  const clearJellyfinProgress = async () => {
+    await db.runAsync('DELETE FROM jellyfin_book_progress;');
+  };
+
   const handleRemoteSync = async () => {
-    console.log("Hello")
     const result = await db.getAllAsync<BookProviderDb>('SELECT * FROM book_providers');
-    console.log(result)
 
     for (const bookProvider of result) {
       let bookEntries = await DropboxProvider.fetchBooksInDir(dropboxProvider.dropboxAccessToken ?? '', bookProvider.remote_path, db);
@@ -40,6 +42,10 @@ export default function Tab() {
       <Button
         title="Sync Remote Books"
         onPress={handleRemoteSync}
+      />
+      <Button
+        title="Clear Jellyfin Progress"
+        onPress={clearJellyfinProgress}
       />
     </View>
   );
