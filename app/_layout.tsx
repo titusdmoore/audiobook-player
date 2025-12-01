@@ -46,7 +46,7 @@ function AppInitializer() {
       })().then(() => { });
     }
 
-    if (!bookProvider.dropboxInitialized) {
+    if (!bookProvider.dropboxInitialized && false) {
       (async () => {
         let tokens = await DropboxProvider.fetchStoreToken();
 
@@ -76,14 +76,20 @@ function AppInitializer() {
             Capability.Play,
             Capability.Pause,
             Capability.SeekTo,
+            Capability.JumpForward,
+            Capability.JumpBackward,
           ],
           compactCapabilities: [
             Capability.Play,
             Capability.Pause,
+            Capability.JumpForward,
+            Capability.JumpBackward,
           ],
           notificationCapabilities: [
             Capability.Play,
             Capability.Pause,
+            Capability.JumpForward,
+            Capability.JumpBackward,
           ],
         }).then(() => { });
       });

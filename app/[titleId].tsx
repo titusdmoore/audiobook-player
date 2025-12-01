@@ -37,9 +37,7 @@ export default function TitleView() {
     if (!startChapterIndex) {
       let duration = await fetchPlayerDuration(db, titleId as string);
       if (duration) {
-        console.log('duration', duration, chapters)
         startChapterIndex = chapters.findIndex((chapter) => chapter.Id == duration.chapter_id);
-        console.log("start Index", startChapterIndex)
       } else {
         startChapterIndex = 0;
       }
@@ -48,7 +46,7 @@ export default function TitleView() {
     for (const chapter of chapters.slice(startChapterIndex)) {
       let track: Track = {
         id: chapter.Id,
-        url: `${jellyfinProvider.jellyfinDomain}/Audio/${chapter.Id}/stream`,
+        url: `${jellyfinProvider.jellyfinDomain}/Audio/${chapter.Id}/universal?TranscodingProtocol=hls&Container=m4b`,
         headers: {
           'Authorization': `MediaBrowser Token="${jellyfinProvider.jellyfinAccessToken}"`
         },

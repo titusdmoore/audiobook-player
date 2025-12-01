@@ -77,3 +77,15 @@ export type JellyfinBookProgressDb = {
 	title_id: string,
 	chapter_id: string,
 };
+
+export const APP_OPTIONS = `CREATE TABLE app_options(
+	id INTEGER PRIMARY KEY NOT NULL,
+	option_name TEXT NOT NULL,
+	option_value TEXT
+);`;
+export const APP_OPTIONS_CONSTRAINT = "CREATE UNIQUE INDEX ux_name_unique ON app_options(option_name);"
+export type AppOptionsDb = {
+	id?: number,
+	option_name: string,
+	option_value: string | null,
+};

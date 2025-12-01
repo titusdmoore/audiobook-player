@@ -42,8 +42,6 @@ function GlobalAudioControls({ title }: any) {
 export default function Layout() {
   const audioPlayerProvider = useAppSelector(state => state.audioPlayer);
 
-  console.log("here", audioPlayerProvider.activeTitle)
-
   return (
     <>
       <Tabs screenOptions={{ tabBarActiveTintColor: 'blue' }} tabBar={(props) => (

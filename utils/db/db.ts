@@ -1,9 +1,9 @@
 import { SQLiteDatabase, SQLiteRunResult } from 'expo-sqlite';
-import { BOOK_CHAPTERS_CREATE, BOOK_PROVIDERS_CREATE, BookChapterDb, BookDb, BOOKS_TABLE_CREATE, JELLYFIN_BOOK_PROGRESS_CREATE, JellyfinBookProgressDb } from './schema';
+import { APP_OPTIONS, APP_OPTIONS_CONSTRAINT, AppOptionsDb, BOOK_CHAPTERS_CREATE, BOOK_PROVIDERS_CREATE, BookChapterDb, BookDb, BOOKS_TABLE_CREATE, JELLYFIN_BOOK_PROGRESS_CREATE, JellyfinBookProgressDb } from './schema';
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 	// BUMP IF MIGRATION NEEDED
-	const DATABASE_VERSION = 3;
+	const DATABASE_VERSION = 5;
 	console.log("here")
 
 	let versionResponse = await db.getFirstAsync<{ user_version: number }>(
@@ -37,6 +37,22 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 			PRAGMA journal_mode = 'wal';
 
 			${JELLYFIN_BOOK_PROGRESS_CREATE}
+		`);
+	}
+
+	if (currentDbVersion === 3) {
+		await db.execAsync(`
+			PRAGMA journal_mode = 'wal';
+
+			${APP_OPTIONS}
+		`);
+	}
+
+	if (currentDbVersion === 4) {
+		await db.execAsync(`
+			PRAGMA journal_mode = 'wal';
+
+			${APP_OPTIONS_CONSTRAINT}
 		`);
 	}
 
@@ -116,4 +132,14 @@ export async function updateTitleDuration(db: SQLiteDatabase, id: number, chapte
 	);
 }
 
-// export async function
+export async function setAppOption(db: SQLiteDatabase, option_name: string, option_value: string) {
+	return await db.runAsync(`INSERT OR REPLACE INTO app_options (option_name, option_value) 
+		VALUES (?, ?);`,
+		option_name,
+		option_value
+	);
+}
+
+export async function getAppOption(db: SQLiteDatabase, option_name: string): Promise<AppOptionsDb | null> {
+	return await db.getFirstAsync('SELECT * FROM app_options WHERE option_name = ?;', option_name);
+}
