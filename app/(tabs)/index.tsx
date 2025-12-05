@@ -28,7 +28,7 @@ export default function Tab() {
   useEffect(() => {
     (async () => {
       let inProgressIds = await db.getAllAsync('SELECT title_id FROM jellyfin_book_progress;');
-      console.log(inProgressIds)
+      console.log("ids", inProgressIds)
       inProgressIds.forEach(async (dbObj: any) => {
         let bookRes = await fetchItem(jellyfinProvider.jellyfinDomain ?? '', jellyfinProvider.jellyfinAccessToken ?? '', jellyfinProvider.jellyfinUser?.Id, dbObj.title_id);
 
