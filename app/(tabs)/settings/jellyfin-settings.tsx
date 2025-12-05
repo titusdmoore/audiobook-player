@@ -52,6 +52,7 @@ export default function JellyfinSettings() {
 
   useEffect(() => {
     (async () => {
+      console.log(await getItemAsync('jellyfinUsername'))
       setDomain(await getItemAsync('jellyfinDomain') ?? '');
       setUsername(await getItemAsync('jellyfinUsername') ?? '');
       setPassword(await getItemAsync('jellyfinPassword') ?? '');

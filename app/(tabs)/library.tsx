@@ -33,6 +33,7 @@ export default function Tab() {
           let userResponse = await authenticateUserByName(await getItemAsync('jellyfinDomain') ?? '', await getItemAsync('jellyfinUsername') ?? '', await getItemAsync('jellyfinPassword') ?? '');
 
           if (userResponse.errors) {
+            console.log(userResponse.errors)
             await setItemAsync('jellyfinAccessToken', '');
             return;
           }

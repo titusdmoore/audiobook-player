@@ -3,7 +3,7 @@ import { Text, View, TouchableOpacity, Button, FlatList, StyleSheet, ScrollView 
 import TrackPlayer, { PitchAlgorithm, State, Track } from "react-native-track-player";
 import { Directory, Paths, File } from "expo-file-system";
 import PlaybackControls from "@/components/molecules/PlaybackControls";
-import { Link } from "expo-router";
+import { Link, useNavigation, usePathname } from "expo-router";
 import { PALETTE } from "@/utils/colors";
 import * as SecureStore from 'expo-secure-store';
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
@@ -18,7 +18,9 @@ import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 
 // source = { require('@/assets/images/react-logo.png') }
 export default function Tab() {
+  const [inProgressIds, setInProgressIds] = useState<{ title_id: string }[]>([]);
   const [inProgressBooks, setInProgressBooks] = useState<any[]>([]);
+  const navigation = usePathname();
   const [booksJelly, setBooksJelly] = useState<any[]>([]);
   const db = useSQLiteContext();
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
@@ -27,15 +29,31 @@ export default function Tab() {
 
   useEffect(() => {
     (async () => {
-      let inProgressIds = await db.getAllAsync('SELECT title_id FROM jellyfin_book_progress;');
-      console.log("ids", inProgressIds)
-      inProgressIds.forEach(async (dbObj: any) => {
-        let bookRes = await fetchItem(jellyfinProvider.jellyfinDomain ?? '', jellyfinProvider.jellyfinAccessToken ?? '', jellyfinProvider.jellyfinUser?.Id, dbObj.title_id);
+      let inProgressIdsDb = await db.getAllAsync('SELECT title_id FROM jellyfin_book_progress LIMIT 10;');
 
-        if (bookRes && bookRes.ok) {
-          setInProgressBooks([...inProgressBooks, await bookRes.json()]);
+      console.log(JSON.stringify(inProgressIdsDb), JSON.stringify(inProgressIds));
+      if (JSON.stringify(inProgressIdsDb) != JSON.stringify(inProgressIds)) {
+        console.log("passed chekc")
+        setInProgressIds(inProgressIdsDb as any);
+
+        console.log("ids", inProgressIds)
+        let books: any[] = [];
+        for (const progressId of inProgressIdsDb) {
+          console.log("before", (progressId as any).title_id, jellyfinProvider.jellyfinUser?.Id)
+          let bookRes = await fetchItem(jellyfinProvider.jellyfinDomain ?? '', jellyfinProvider.jellyfinAccessToken ?? '', jellyfinProvider.jellyfinUser?.Id, (progressId as any).title_id);
+
+          console.log(bookRes)
+          if (bookRes && bookRes.ok) {
+            console.log('hi', bookRes)
+            books.push(await bookRes.json());
+          } else {
+            // console.log(await bookRes.text())
+          }
         }
-      });
+
+        console.log("here", books)
+        setInProgressBooks(books);
+      }
       // let booksResponse = await fetchAudiobooks(jellyfinProvider.jellyfinDomain ?? '', jellyfinProvider.jellyfinAccessToken ?? '');
 
       // if (booksResponse && booksResponse.ok) {
@@ -56,7 +74,7 @@ export default function Tab() {
       //   }
       // }
     })().then(() => { });
-  }, [])
+  }, [navigation])
 
   return (
     <SafeAreaView style={styles.sectionContainer}>
