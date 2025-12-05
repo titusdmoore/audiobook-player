@@ -3,8 +3,14 @@ import { APP_OPTIONS, APP_OPTIONS_CONSTRAINT, AppOptionsDb, BOOK_CHAPTERS_CREATE
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 	// BUMP IF MIGRATION NEEDED
-	const DATABASE_VERSION = 5;
+	const DATABASE_VERSION = 6;
 	console.log("here")
+
+	// NOTE: CHANGE TO TRUE TO RESET DB
+	if (false) {
+		await resetDB(db);
+		await db.execAsync(`PRAGMA user_version = 0`);
+	}
 
 	let versionResponse = await db.getFirstAsync<{ user_version: number }>(
 		'PRAGMA user_version'
@@ -21,18 +27,17 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 		return;
 	}
 
-	if (currentDbVersion === 0) {
+	if (currentDbVersion <= 0) {
 		await db.execAsync(`
 			PRAGMA journal_mode = 'wal';
 
 			${BOOK_PROVIDERS_CREATE}
 			${BOOKS_TABLE_CREATE}
 			${BOOK_CHAPTERS_CREATE}
-			${JELLYFIN_BOOK_PROGRESS_CREATE}
 		`);
 	}
 
-	if (currentDbVersion === 2) {
+	if (currentDbVersion <= 2) {
 		await db.execAsync(`
 			PRAGMA journal_mode = 'wal';
 
@@ -40,7 +45,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 		`);
 	}
 
-	if (currentDbVersion === 3) {
+	if (currentDbVersion <= 3) {
 		await db.execAsync(`
 			PRAGMA journal_mode = 'wal';
 
@@ -48,7 +53,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 		`);
 	}
 
-	if (currentDbVersion === 4) {
+	if (currentDbVersion <= 5) {
 		await db.execAsync(`
 			PRAGMA journal_mode = 'wal';
 
@@ -57,6 +62,16 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 	}
 
 	await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
+}
+
+export async function resetDB(db: SQLiteDatabase) {
+	await db.execAsync(`
+		DROP TABLE IF EXISTS book_providers;
+		DROP TABLE IF EXISTS books;
+		DROP TABLE IF EXISTS book_chapters;
+		DROP TABLE IF EXISTS jellyfin_book_progress;
+		DROP TABLE IF EXISTS app_options;
+	`);
 }
 
 export async function addBookProvider(db: SQLiteDatabase, data: { name: string, remotePath: string, lastPulled?: number }) {

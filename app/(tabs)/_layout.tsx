@@ -53,6 +53,12 @@ export default function Layout() {
         <Tabs.Screen
           name="index"
           options={{
+            title: 'Home',
+            tabBarIcon: ({ color }) => <FontAwesome6Pro name="house" size={24} color={color} />
+          }} />
+        <Tabs.Screen
+          name='library'
+          options={{
             title: 'Library',
             tabBarIcon: ({ color }) => <FontAwesome6Pro name="books" size={24} color={color} />
           }} />

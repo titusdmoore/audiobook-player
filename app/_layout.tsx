@@ -70,7 +70,7 @@ function AppInitializer() {
       }).then(() => {
         dispatch(setInitialized(true));
 
-        TrackPlayer.updateOptions({
+        TrackPlayer.updateOptions(({
           progressUpdateEventInterval: 3,
           capabilities: [
             Capability.Play,
@@ -91,7 +91,7 @@ function AppInitializer() {
             Capability.JumpForward,
             Capability.JumpBackward,
           ],
-        }).then(() => { });
+        }) as any).then(() => { });
       });
 
     }
@@ -105,7 +105,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={AudiobookPlayerTheme}>
       <Provider store={store}>
-        <SQLiteProvider databaseName="abp.db" onInit={migrateDbIfNeeded}>
+        <SQLiteProvider options={{ useNewConnection: true }} databaseName="abp.db" onInit={migrateDbIfNeeded}>
           <AppInitializer />
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

@@ -27,14 +27,14 @@ export function ListTitleCardJelly({ index, item }: any) {
 	const jellyfinProvider = useAppSelector(state => state.bookProvider);
 
 	return (
-		<View style={{ width: '50%', marginBottom: 24, justifyContent: 'center', alignItems: 'center' }} key={index}>
+		<View style={{ width: '50%', marginBottom: 18, justifyContent: 'center', alignItems: 'center' }} key={index}>
 			<Link href={{
 				pathname: '/[titleId]',
 				params: { titleId: item.Id }
 			}}>
 				<View style={{ justifyContent: 'center', alignItems: 'center' }}>
 					<Image source={`${jellyfinProvider.jellyfinDomain}/Items/${item.Id}/Images/Primary`} style={{ width: 125, height: 125 }} />
-					<Text style={{ color: PALETTE.text, fontSize: 16, textAlign: 'center' }}>{item.Name}</Text>
+					<Text style={{ color: PALETTE.text, fontSize: 16, textAlign: 'center', paddingTop: 6 }}>{item.Name}</Text>
 				</View>
 			</Link>
 		</View>

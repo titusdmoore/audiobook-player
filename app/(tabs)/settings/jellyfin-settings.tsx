@@ -1,10 +1,10 @@
 import { PALETTE } from "@/utils/colors";
 import { View, Text, TextInput, TouchableOpacity, Button, StyleSheet } from "react-native";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { authenticateUserByName } from "@/utils/book-providers/jellyfin";
 import { setAccessToken, setJellyfinDomain, setJellyfinUser } from "@/utils/slices/book-provider-slice";
-import { deleteItemAsync, setItemAsync } from "expo-secure-store";
+import { deleteItemAsync, getItemAsync, setItemAsync } from "expo-secure-store";
 
 export default function JellyfinSettings() {
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
@@ -29,6 +29,8 @@ export default function JellyfinSettings() {
 
       // throw new Error('Breakpoint, prior to setItem' + JSON.stringify(userResponse));
       await setItemAsync('jellyfinAccessToken', userResponse.accessToken);
+      await setItemAsync('jellyfinUsername', userResponse.accessToken);
+      await setItemAsync('jellyfinPassword', userResponse.accessToken);
       await setItemAsync('jellyfinUserId', userResponse.user.Id);
       await setItemAsync('jellyfinDomain', domain);
       dispatch(setAccessToken(userResponse.accessToken));
@@ -48,6 +50,14 @@ export default function JellyfinSettings() {
     dispatch(setJellyfinUser(undefined));
   }
 
+  useEffect(() => {
+    (async () => {
+      setDomain(await getItemAsync('jellyfinDomain') ?? '');
+      setUsername(await getItemAsync('jellyfinUsername') ?? '');
+      setPassword(await getItemAsync('jellyfinPassword') ?? '');
+    })().then(() => { });
+  }, []);
+
   return (
     <View>
       <View>
@@ -55,9 +65,9 @@ export default function JellyfinSettings() {
         {jellyfinProvider.jellyfinAccessToken && (<Text style={{ color: PALETTE.text }}>Connected</Text>)}
         {errorMessage && (<Text style={{ color: PALETTE.text, padding: 12 }}>{errorMessage}</Text>)}
       </View>
-      <TextInput style={styles.input} placeholder="Domain" value={domain} onChangeText={setDomain} />
-      <TextInput style={styles.input} placeholder="Username" value={username} onChangeText={setUsername} />
-      <TextInput style={styles.input} placeholder="Password" value={password} onChangeText={setPassword} textContentType="password" />
+      <TextInput style={styles.input} autoCapitalize="none" placeholder="Domain" value={domain} onChangeText={setDomain} />
+      <TextInput style={styles.input} autoCapitalize="none" placeholder="Username" value={username} onChangeText={setUsername} />
+      <TextInput style={styles.input} autoCapitalize="none" placeholder="Password" secureTextEntry={true} value={password} onChangeText={setPassword} textContentType="password" />
       <View style={{ flexDirection: 'row' }}>
         <TouchableOpacity style={{ backgroundColor: PALETTE.primary }} onPress={handleLogin}>
           <Text style={{ color: PALETTE.text }}>Sign In</Text>

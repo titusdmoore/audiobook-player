@@ -3,24 +3,33 @@ import TrackPlayer, { Event, PlaybackActiveTrackChangedEvent, PlaybackProgressUp
 import { createTitleDuration, fetchPlayerDuration, getAppOption, setAppOption, updateTitleDuration } from "./utils/db/db";
 import { JellyfinBookProgressDb } from "./utils/db/schema";
 
+enum DURATION_POSITION_ENUM {
+  UNSET,
+  SET_CORRECT_TRACK,
+  SET_CORRECT_POSITION,
+}
+
 export const PlaybackService = async () => {
-  const db = await openDatabaseAsync('abp.db');
-  let seekChangedDueToDuration = false;
+  const db = await openDatabaseAsync('abp.db', {
+    useNewConnection: true
+  });
 
   TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play());
   TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause());
   TrackPlayer.addEventListener(Event.RemoteNext, () => TrackPlayer.skipToNext());
   TrackPlayer.addEventListener(Event.RemotePrevious, () => TrackPlayer.skipToPrevious());
   TrackPlayer.addEventListener(Event.PlaybackState, async (event: PlaybackState) => {
-    let trackObject = await TrackPlayer.getActiveTrack();
-    // Seek Changed Due to Duration prevents infinite loop
-    if (trackObject && !seekChangedDueToDuration) {
-      seekChangedDueToDuration = true;
+    let newTitleLoaded = await getAppOption(db, 'new_title_loaded');
+    let queue = await TrackPlayer.getQueue();
 
-      let duration = await fetchPlayerDuration(db, trackObject.parentItemId);
-      if (event.state == State.Ready && duration) {
-        // await TrackPlayer.play();
-        await TrackPlayer.seekTo(duration.position);
+    // Seek Changed Due to Duration prevents infinite loop
+    if (queue && queue.length > 0) {
+      if (newTitleLoaded && newTitleLoaded.option_value === 'true') {
+        let duration = await fetchPlayerDuration(db, queue[0].parentItemId);
+        let activeIndex = queue.findIndex((queueTrack) => (queueTrack.id == duration?.chapter_id));
+
+        await TrackPlayer.skip(activeIndex != -1 ? activeIndex : 0, duration?.position);
+        await setAppOption(db, "new_title_loaded", "false");
       }
     }
 

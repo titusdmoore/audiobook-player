@@ -1,5 +1,7 @@
 // import { fetch } from "expo/fetch";
 
+import { encodeObjectToQueryParams } from "..";
+
 export type AuthenticateUserByNameResponse = {
 	user: any | null;
 	accessToken: string | null;
@@ -52,12 +54,27 @@ export async function getUserById(domain: string, id: string, accessToken: strin
 	return response;
 }
 
-export async function fetchAudiobooks(domain: string, accessToken: string, limit?: number, offset?: number, parentId?: string) {
-	parentId = parentId ?? '4e985111ed7f570b595204d82adb02f3';
-	limit = limit ?? 14;
-	offset = offset ?? 0;
+export type FetchAudiobookOptions = {
+	parentId?: string;
+	limit?: number;
+	startIndex?: number;
+	enableTotalRecordCount?: boolean;
+	enableImages?: boolean;
+};
 
-	let response = await fetch(`${domain}/Items?parentId=${parentId}&limit=${limit}&startIndex=${offset}&enableTotalRecordCount=true&enableImages=true`, {
+export async function fetchAudiobooks(domain: string, accessToken: string, options?: FetchAudiobookOptions) {
+	const defaultOptions: FetchAudiobookOptions = {
+		parentId: '4e985111ed7f570b595204d82adb02f3',
+		limit: 14,
+		startIndex: 0,
+	};
+
+	let mergedOptions = {
+		...defaultOptions,
+		...options
+	};
+
+	let response = await fetch(`${domain}/Items?${encodeObjectToQueryParams(mergedOptions)}`, {
 		method: 'GET',
 		headers: new Headers({
 			'accept': 'application/json',
@@ -83,4 +100,6 @@ export async function reportItemPlaying(domain: string, accessToken: string, use
 	console.log(await response.json())
 }
 
+export async function downloadTitle() {
 
+}
