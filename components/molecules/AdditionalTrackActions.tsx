@@ -9,6 +9,8 @@ import SleepTimerControlsModal from "../atoms/SleepTimerControlsModal";
 import { useSQLiteContext } from "expo-sqlite";
 import { getAppOption, setAppOption } from "@/utils/db/db";
 import moment from "moment";
+import { useAppDispatch } from "@/utils/hooks";
+import { setSleepTimer as setStoreSleepTimer } from "@/utils/slices/book-provider-slice";
 // import { useTrackPlayerEvents, Event, State } from "react-native-track-player";
 
 
@@ -20,16 +22,19 @@ export default function AdditionalTrackActions() {
 	const [playbackRateModalIsOpen, setPlaybackRateModalIsOpen] = useState<boolean>(false);
 	const [sleepTimerModalOpen, setSleepTimerModalOpen] = useState<boolean>(false);
 	const db = useSQLiteContext();
+	const dispatch = useAppDispatch();
 
 	useEffect(() => {
 		(async () => {
 			if (!sleepTimer) {
 				await setAppOption(db, "sleep_timer", "");
+				dispatch(setStoreSleepTimer(undefined));
 				return;
 			}
 
 			var newDateObj = moment(new Date()).add(sleepTimer, 'm').toDate();
 			await setAppOption(db, "sleep_timer", newDateObj.getTime().toString());
+			dispatch(setStoreSleepTimer(newDateObj.getTime()));
 		})().then(() => { });
 	}, [sleepTimer]);
 

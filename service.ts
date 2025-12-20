@@ -1,6 +1,6 @@
 import { openDatabaseAsync } from "expo-sqlite";
 import TrackPlayer, { Event, PlaybackActiveTrackChangedEvent, PlaybackProgressUpdatedEvent, PlaybackState, State } from "react-native-track-player";
-import { createTitleDuration, fetchPlayerDuration, getAppOption, setAppOption, updateTitleDuration } from "./utils/db/db";
+import { createTitleDuration, fetchPlayerDuration, getAppOption, getOrCreateDatabaseKey, setAppOption, updateTitleDuration } from "./utils/db/db";
 import { JellyfinBookProgressDb } from "./utils/db/schema";
 
 enum DURATION_POSITION_ENUM {
@@ -10,9 +10,10 @@ enum DURATION_POSITION_ENUM {
 }
 
 export const PlaybackService = async () => {
-  const db = await openDatabaseAsync('abp.db', {
+  const db = await openDatabaseAsync('abp_secure.db', {
     useNewConnection: true
   });
+  await db.execAsync(`PRAGMA key = '${await getOrCreateDatabaseKey()}'`)
 
   TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play());
   TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause());

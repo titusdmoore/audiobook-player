@@ -1,10 +1,16 @@
 import { SQLiteDatabase, SQLiteRunResult } from 'expo-sqlite';
-import { APP_OPTIONS, APP_OPTIONS_CONSTRAINT, AppOptionsDb, BOOK_CHAPTERS_CREATE, BOOK_PROVIDERS_CREATE, BookChapterDb, BookDb, BOOKS_TABLE_CREATE, JELLYFIN_BOOK_PROGRESS_CREATE, JellyfinBookProgressDb } from './schema';
+import { APP_OPTIONS, APP_OPTIONS_CONSTRAINT, AppOptionsDb, BOOK_CHAPTERS_CREATE, BOOK_PROVIDERS_CREATE, BookChapterDb, BookDb, BOOKS_TABLE_CREATE, ItemDb, ITEMS_CREATE, JELLYFIN_BOOK_PROGRESS_CREATE, JellyfinBookProgressDb } from './schema';
+import { getItemAsync, setItemAsync } from 'expo-secure-store';
+import { getRandomBytesAsync } from 'expo-crypto';
+
+export const ENCRYPTION_KEY_NAME = 'db_encryption_key';
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 	// BUMP IF MIGRATION NEEDED
-	const DATABASE_VERSION = 6;
+	const DATABASE_VERSION = 7;
 	console.log("here")
+
+	await db.execAsync(`PRAGMA key = '${await getOrCreateDatabaseKey()}'`)
 
 	// NOTE: CHANGE TO TRUE TO RESET DB
 	if (false) {
@@ -28,6 +34,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 	}
 
 	if (currentDbVersion <= 0) {
+
 		await db.execAsync(`
 			PRAGMA journal_mode = 'wal';
 
@@ -61,6 +68,14 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 		`);
 	}
 
+	if (currentDbVersion <= 6) {
+		await db.execAsync(`
+			PRAGMA journal_mode = 'wal';
+
+			${ITEMS_CREATE}
+		`);
+	}
+
 	await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }
 
@@ -71,6 +86,7 @@ export async function resetDB(db: SQLiteDatabase) {
 		DROP TABLE IF EXISTS book_chapters;
 		DROP TABLE IF EXISTS jellyfin_book_progress;
 		DROP TABLE IF EXISTS app_options;
+		DROP TABLE IF EXISTS items;
 	`);
 }
 
@@ -157,4 +173,67 @@ export async function setAppOption(db: SQLiteDatabase, option_name: string, opti
 
 export async function getAppOption(db: SQLiteDatabase, option_name: string): Promise<AppOptionsDb | null> {
 	return await db.getFirstAsync('SELECT * FROM app_options WHERE option_name = ?;', option_name);
+}
+
+export async function getOrCreateDatabaseKey(): Promise<string> {
+	// Check if we already have a key
+	let key = await getItemAsync(ENCRYPTION_KEY_NAME);
+
+	if (!key) {
+		// Generate a new random 256-bit key
+		const randomBytes = await getRandomBytesAsync(32);
+		key = Array.from(randomBytes)
+			.map(byte => byte.toString(16).padStart(2, '0'))
+			.join('');
+
+		// Store it securely for future use
+		await setItemAsync(ENCRYPTION_KEY_NAME, key);
+	}
+
+	return key;
+}
+
+export async function createItem(db: SQLiteDatabase, item: ItemDb) {
+	console.log(typeof db)
+	return await db.runAsync(
+		`INSERT INTO items(
+			name, 
+			id,
+			server_id,
+			etag,
+			date_created,
+			date_last_media_added,
+			can_delete,
+			can_download,
+			sort_name,
+			duration,
+			parent_id,
+			remote_path,
+			local_path,
+			downloaded,
+			local_image_path,
+			parent_db_id
+		)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+		item.name,
+		item.id,
+		item.server_id,
+		item.etag,
+		item.date_created,
+		item.date_last_media_added,
+		item.can_delete,
+		item.can_download,
+		item.sort_name,
+		item.duration,
+		item.parent_id,
+		item.remote_path,
+		item.local_path,
+		item.downloaded,
+		item.local_image_path,
+		item.parent_db_id
+	);
+}
+
+export async function getDownloadedTitles(db: SQLiteDatabase) {
+	return await db.getAllAsync('SELECT * FROM items WHERE parent_db_id IS NULL AND downloaded = 1;');
 }

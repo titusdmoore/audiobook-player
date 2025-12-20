@@ -1,5 +1,5 @@
 import { PALETTE } from "@/utils/colors";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useAppSelector } from "@/utils/hooks";
 import { Image } from "expo-image";
 import { useEffect } from "react";
@@ -22,12 +22,11 @@ export default function ListTitleCard({ index, item }: any) {
 	);
 }
 
-export function ListTitleCardJelly({ index, item }: any) {
-	// console.log(index, item)
+export function ListTitleCardJelly({ index, item, horizontal }: any) {
 	const jellyfinProvider = useAppSelector(state => state.bookProvider);
 
 	return (
-		<View style={{ width: '50%', marginBottom: 18, justifyContent: 'center', alignItems: 'center' }} key={index}>
+		<View style={horizontal ? styles.horizontalContainer : styles.verticalContainer} key={index}>
 			<Link href={{
 				pathname: '/[titleId]',
 				params: { titleId: item.Id }
@@ -40,3 +39,17 @@ export function ListTitleCardJelly({ index, item }: any) {
 		</View>
 	);
 }
+
+const styles = StyleSheet.create({
+	verticalContainer: {
+		width: '50%',
+		marginBottom: 18,
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	horizontalContainer: {
+		width: 125,
+		alignItems: 'center',
+		marginHorizontal: 10,
+	},
+})

@@ -4,7 +4,9 @@ import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import { useEffect, useState } from "react";
 import { authenticateUserByName } from "@/utils/book-providers/jellyfin";
 import { setAccessToken, setJellyfinDomain, setJellyfinUser } from "@/utils/slices/book-provider-slice";
-import { deleteItemAsync, getItemAsync, setItemAsync } from "expo-secure-store";
+import { Storage } from 'expo-sqlite/kv-store';
+import { getAppOption, setAppOption } from "@/utils/db/db";
+import { useSQLiteContext } from "expo-sqlite";
 
 export default function JellyfinSettings() {
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
@@ -13,6 +15,7 @@ export default function JellyfinSettings() {
   const [password, setPassword] = useState<string>("");
   const [domain, setDomain] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const db = useSQLiteContext();
 
   const handleLogin = async () => {
     let message = '';
@@ -28,11 +31,11 @@ export default function JellyfinSettings() {
       }
 
       // throw new Error('Breakpoint, prior to setItem' + JSON.stringify(userResponse));
-      await setItemAsync('jellyfinAccessToken', userResponse.accessToken);
-      await setItemAsync('jellyfinUsername', userResponse.accessToken);
-      await setItemAsync('jellyfinPassword', userResponse.accessToken);
-      await setItemAsync('jellyfinUserId', userResponse.user.Id);
-      await setItemAsync('jellyfinDomain', domain);
+      await setAppOption(db, 'jellyfinAccessToken', userResponse.accessToken);
+      await setAppOption(db, 'jellyfinUsername', userResponse.accessToken);
+      await setAppOption(db, 'jellyfinPassword', userResponse.accessToken);
+      await setAppOption(db, 'jellyfinUserId', userResponse.user.Id);
+      await setAppOption(db, 'jellyfinDomain', domain);
       dispatch(setAccessToken(userResponse.accessToken));
       dispatch(setJellyfinUser(userResponse.user));
     } catch (error) {
@@ -41,9 +44,9 @@ export default function JellyfinSettings() {
   };
 
   const disconnectJellyfin = async () => {
-    await deleteItemAsync('jellyfinUserId');
-    await deleteItemAsync('jellyfinAccessToken');
-    await deleteItemAsync('jellyfinDomain');
+    await setAppOption(db, 'jellyfinUserId', '');
+    await setAppOption(db, 'jellyfinAccessToken', '');
+    await setAppOption(db, 'jellyfinDomain', '');
 
     dispatch(setJellyfinDomain(undefined));
     dispatch(setAccessToken(undefined));
@@ -52,10 +55,10 @@ export default function JellyfinSettings() {
 
   useEffect(() => {
     (async () => {
-      console.log(await getItemAsync('jellyfinUsername'))
-      setDomain(await getItemAsync('jellyfinDomain') ?? '');
-      setUsername(await getItemAsync('jellyfinUsername') ?? '');
-      setPassword(await getItemAsync('jellyfinPassword') ?? '');
+      console.log(await getAppOption(db, 'jellyfinUsername'))
+      setDomain((await getAppOption(db, 'jellyfinDomain'))?.option_value ?? '');
+      setUsername((await getAppOption(db, 'jellyfinUsername'))?.option_value ?? '');
+      setPassword((await getAppOption(db, 'jellyfinPassword'))?.option_value ?? '');
     })().then(() => { });
   }, []);
 

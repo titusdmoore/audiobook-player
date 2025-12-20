@@ -53,6 +53,56 @@ export const BOOK_CHAPTERS_CREATE = `CREATE TABLE book_chapters(
 	FOREIGN KEY (book_id) REFERENCES books(id)
 );`;
 
+export type ItemDb = {
+	db_id?: number;
+
+	// Jelly Fields
+	name: string;
+	server_id: string;
+	etag: string;
+	date_created: string;
+	date_last_media_added: string;
+	can_delete: number;
+	can_download: number;
+	parent_id: string | null;
+	id: string;
+	duration: number | null;
+	sort_name: string;
+	remote_path: string;
+
+	// Local Storage Fields
+	local_path: string | null;
+	local_image_path: string | null;
+	downloaded: boolean;
+
+	// Helper Fields
+	parent_db_id: number | null;
+};
+
+export const ITEMS_CREATE = `CREATE TABLE items(
+	db_id INTEGER PRIMARY KEY NOT NULL,
+
+	name TEXT NOT NULL,
+	id TEXT NOT NULL,
+	server_id TEXT,
+	etag TEXT,
+	date_created TEXT NOT NULL,
+	date_last_media_added TEXT,
+	can_delete INTEGER,
+	can_download INTEGER NOT NULL,
+	sort_name TEXT,
+	duration INTEGER,
+	parent_id TEXT,
+	remote_path TEXT NOT NULL,
+
+	local_path TEXT,
+	downloaded INTEGER NOT NULL,
+	local_image_path TEXT,
+
+	parent_db_id INTEGER,
+	FOREIGN KEY (parent_db_id) REFERENCES items(db_id)
+);`;
+
 export type BookChapterDb = {
 	id?: number,
 	title: string,

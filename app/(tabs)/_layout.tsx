@@ -8,6 +8,7 @@ import { useAppSelector } from "@/utils/hooks";
 import AudioControls, { ControlsType } from "@/components/atoms/AudioControls";
 import { useEffect, useState } from "react";
 import TrackPlayer from "react-native-track-player";
+import HeaderBar from "@/components/molecules/HeaderBar";
 
 function GlobalAudioControls({ title }: any) {
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
@@ -44,7 +45,10 @@ export default function Layout() {
 
   return (
     <>
-      <Tabs screenOptions={{ tabBarActiveTintColor: 'blue' }} tabBar={(props) => (
+      <Tabs screenOptions={{
+        tabBarActiveTintColor: 'blue',
+        header: (props) => <HeaderBar {...props} />,
+      }} tabBar={(props) => (
         <View>
           {audioPlayerProvider.activeTitle && (<GlobalAudioControls title={audioPlayerProvider.activeTitle} />)}
           <BottomTabBar {...props} />
@@ -60,7 +64,8 @@ export default function Layout() {
           name='library'
           options={{
             title: 'Library',
-            tabBarIcon: ({ color }) => <FontAwesome6Pro name="books" size={24} color={color} />
+            href: { pathname: '/library', params: { searchTerm: '' } },
+            tabBarIcon: ({ color }) => <FontAwesome6Pro name="books" size={24} color={color} />,
           }} />
         <Tabs.Screen
           name="settings"

@@ -1,5 +1,5 @@
 import PlaybackControls from "@/components/molecules/PlaybackControls";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Directory, Paths, File } from "expo-file-system";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useAppSelector } from "@/utils/hooks";
@@ -7,6 +7,29 @@ import TrackPlayer, { PitchAlgorithm, State, Track, TrackType, useActiveTrack } 
 import { Image } from "expo-image";
 import { PALETTE } from "@/utils/colors";
 import { reportItemPlaying } from "@/utils/book-providers/jellyfin";
+import { formatAudioProgressTime } from "@/utils/audio-player";
+
+export function TitleImage({ sleepTimer, activeTitle }: { sleepTimer: number | null, activeTitle: any }) {
+  const jellyfinProvider = useAppSelector(state => state.bookProvider);
+
+  if (sleepTimer !== null) {
+    console.log('sleep timer', sleepTimer)
+    return (
+      <View style={styles.titleImageContainer}>
+        <View style={styles.sleepTimerContainer}>
+          <Text style={styles.sleepTimerText}>{formatAudioProgressTime(sleepTimer)}</Text>
+        </View>
+        <Image source={`${jellyfinProvider.jellyfinDomain}/Items/${(activeTitle as any).Id}/Images/Primary`} style={styles.image} />
+      </View>
+    );
+  }
+
+  return (
+    <>
+      {activeTitle && (<Image source={`${jellyfinProvider.jellyfinDomain}/Items/${(activeTitle as any).Id}/Images/Primary`} style={styles.image} />)}
+    </>
+  );
+}
 
 export default function Modal() {
   const downloadableUrl = "https://www.dropbox.com/scl/fi/qfznbgt45q9xhfvk5zr6q/Reforming-Marriage-B0DTLF3Y45-03-Introduction.m4b?rlkey=9o4lyhguz4gotsri5rnyr1fp2&e=1&st=51erbmbw&dl=1"
@@ -14,21 +37,42 @@ export default function Modal() {
   const audioPlayer = useAppSelector(state => state.audioPlayer);
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
   const activeTrack = useActiveTrack();
-
-  // console.log("user", jellyfinProvider.jellyfinUser, console.log(activeTrack))
+  const [remainingSleepTimer, setRemainingSleepTimer] = useState<number | null>(null);
 
   useEffect(() => {
-    console.log('active track', activeTrack)
-  }, [activeTrack]);
+    if (jellyfinProvider.sleepTimer) {
+      const timerInterval = setInterval(() => {
+        setRemainingSleepTimer((prevTime) => {
+          console.log('prev time', prevTime)
+          if (prevTime === 0) {
+            clearInterval(timerInterval);
+            // Perform actions when the timer reaches zero
+            console.log('Countdown complete!');
+            return null;
+          } else if (prevTime == null) {
+            if (jellyfinProvider.sleepTimer) {
+              let timerDate = new Date(jellyfinProvider.sleepTimer);
+              let now = new Date();
 
-  // console.log(audioPlayer)
-  // const testing = async () => {
-  //   // await reportItemPlaying(jellyfinProvider.jellyfinDomain, jellyfinProvider.jellyfinAccessToken, jellyfinProvider.jellyfinUser?.Id, activeTrack.id, 135)
-  // }
+              return Math.round((timerDate.getTime() - now.getTime()) / 1000);
+            }
+
+            return null;
+          } else {
+            return prevTime - 1;
+          }
+        });
+      }, 1000);
+
+      // Cleanup the interval when the component unmounts
+      return () => clearInterval(timerInterval);
+    }
+  }, [jellyfinProvider.sleepTimer]);
 
   return (
     <View style={styles.rootContainer}>
-      {audioPlayer.activeTitle && (<Image source={`${jellyfinProvider.jellyfinDomain}/Items/${(audioPlayer.activeTitle as any).Id}/Images/Primary`} style={styles.image} />)}
+      {remainingSleepTimer && (<Text style={{ color: PALETTE.text }}>{formatAudioProgressTime(remainingSleepTimer)}</Text>)}
+      <TitleImage sleepTimer={remainingSleepTimer} activeTitle={audioPlayer.activeTitle} />
       {(activeTrack && activeTrack.title) && (<Text style={styles.title}>{activeTrack?.title}</Text>)}
       <PlaybackControls />
     </View>
@@ -50,5 +94,20 @@ const styles = StyleSheet.create({
     height: 225,
     marginBottom: 12
   },
-
+  titleImageContainer: {
+    position: 'relative',
+  },
+  sleepTimerContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0,.6)',
+    zIndex: 99,
+  },
+  sleepTimerText: {
+    color: PALETTE.text,
+    fontSize: 24,
+  }
 });

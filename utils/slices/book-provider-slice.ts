@@ -11,6 +11,7 @@ export type BookProviderState = {
 	jellyfinUser?: any;
 	jellyfinAccessToken?: string;
 	jellyfinDomain?: string;
+	sleepTimer?: number;
 };
 
 const bookProviderInitialState: BookProviderState = {
@@ -38,8 +39,11 @@ const bookProviderSlice = createSlice({
 		setAccessToken: (state, action: PayloadAction<string | undefined>) => {
 			state.jellyfinAccessToken = action.payload;
 		},
+		setSleepTimer: (state, action: PayloadAction<number | undefined>) => {
+			state.sleepTimer = action.payload;
+		},
 	}
 });
 
-export const { setDropboxTokens, setDropboxInitialized, setAccessToken, setJellyfinUser, setJellyfinDomain } = bookProviderSlice.actions;
+export const { setDropboxTokens, setDropboxInitialized, setAccessToken, setJellyfinUser, setJellyfinDomain, setSleepTimer } = bookProviderSlice.actions;
 export default bookProviderSlice.reducer;

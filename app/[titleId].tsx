@@ -1,4 +1,4 @@
-import { fetchAudiobooks, fetchItem } from "@/utils/book-providers/jellyfin";
+import { downloadTitle, fetchAudiobooks, fetchItem } from "@/utils/book-providers/jellyfin";
 import { PALETTE } from "@/utils/colors";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useEffect, useLayoutEffect, useState } from "react";
@@ -63,6 +63,10 @@ export default function TitleView() {
 
   const [title, setTitle] = useState<any>(null);
   const router = useRouter();
+
+  const handleDowloadTitleClick = async () => {
+    downloadTitle(db, jellyfinProvider.jellyfinDomain ?? '', jellyfinProvider.jellyfinAccessToken ?? '', jellyfinProvider.jellyfinUser?.Id, titleId as string)
+  };
 
   const loadTracksForTitle = async (startChapterIndex?: number) => {
     await TrackPlayer.reset();
@@ -135,7 +139,7 @@ export default function TitleView() {
             <Text style={styles.playTitleButtonText}>Play Title</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={[styles.buttonRoot, styles.chapterListButton]} onPress={() => { }}>
+        <TouchableOpacity style={[styles.buttonRoot, styles.chapterListButton]} onPress={handleDowloadTitleClick}>
           <Text style={styles.playTitleButtonText}>Download Title</Text>
         </TouchableOpacity>
       </View>
