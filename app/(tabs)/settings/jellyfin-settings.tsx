@@ -1,5 +1,5 @@
 import { PALETTE } from "@/utils/colors";
-import { View, Text, TextInput, TouchableOpacity, Button, StyleSheet } from "react-native";
+import { View, Text, TextInput as RnTextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import { useEffect, useState } from "react";
 import { authenticateUserByName } from "@/utils/book-providers/jellyfin";
@@ -7,6 +7,8 @@ import { setAccessToken, setJellyfinDomain, setJellyfinUser } from "@/utils/slic
 import { Storage } from 'expo-sqlite/kv-store';
 import { getAppOption, setAppOption } from "@/utils/db/db";
 import { useSQLiteContext } from "expo-sqlite";
+import TextInput from "@/components/atoms/TextInput";
+import Button from "@/components/atoms/Button";
 
 export default function JellyfinSettings() {
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
@@ -69,9 +71,14 @@ export default function JellyfinSettings() {
         {jellyfinProvider.jellyfinAccessToken && (<Text style={{ color: PALETTE.text }}>Connected</Text>)}
         {errorMessage && (<Text style={{ color: PALETTE.text, padding: 12 }}>{errorMessage}</Text>)}
       </View>
-      <TextInput style={styles.input} autoCapitalize="none" placeholder="Domain" value={domain} onChangeText={setDomain} />
-      <TextInput style={styles.input} autoCapitalize="none" placeholder="Username" value={username} onChangeText={setUsername} />
-      <TextInput style={styles.input} autoCapitalize="none" placeholder="Password" secureTextEntry={true} value={password} onChangeText={setPassword} textContentType="password" />
+      <RnTextInput style={styles.input} autoCapitalize="none" placeholder="Domain" value={domain} onChangeText={setDomain} />
+      <RnTextInput style={styles.input} autoCapitalize="none" placeholder="Username" value={username} onChangeText={setUsername} />
+      <RnTextInput style={styles.input} autoCapitalize="none" placeholder="Password" secureTextEntry={true} value={password} onChangeText={setPassword} textContentType="password" />
+      <TextInput value={''} onChangeText={() => { }} />
+      <View style={styles.buttonContainer}>
+        <Button />
+        <Button />
+      </View>
       <View style={{ flexDirection: 'row' }}>
         <TouchableOpacity style={{ backgroundColor: PALETTE.primary }} onPress={handleLogin}>
           <Text style={{ color: PALETTE.text }}>Sign In</Text>
@@ -91,5 +98,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 6,
     color: PALETTE.text
-  }
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingVertical: 12,
+  },
 })
