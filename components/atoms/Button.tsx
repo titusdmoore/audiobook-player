@@ -1,9 +1,11 @@
 import { PALETTE } from "@/utils/colors";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { cloneElement, ReactElement, ReactNode } from "react";
 
-export default function Button() {
+export default function Button({ children }: { children: ReactElement }) {
 	return (
 		<TouchableOpacity style={[styles.buttonRoot, styles.chapterListButton]} onPress={() => { }}>
+			{cloneElement(children, { style: [styles.buttonText] })}
 			<Text style={styles.buttonText}>View Chapters</Text>
 		</TouchableOpacity>
 	);
