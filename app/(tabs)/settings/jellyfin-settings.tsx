@@ -76,16 +76,12 @@ export default function JellyfinSettings() {
       <RnTextInput style={styles.input} autoCapitalize="none" placeholder="Password" secureTextEntry={true} value={password} onChangeText={setPassword} textContentType="password" />
       <TextInput value={''} onChangeText={() => { }} />
       <View style={styles.buttonContainer}>
-        <Button />
-        <Button />
-      </View>
-      <View style={{ flexDirection: 'row' }}>
-        <TouchableOpacity style={{ backgroundColor: PALETTE.primary }} onPress={handleLogin}>
-          <Text style={{ color: PALETTE.text }}>Sign In</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ backgroundColor: PALETTE.primary }} onPress={disconnectJellyfin}>
-          <Text style={{ color: PALETTE.text }}>Disconnect</Text>
-        </TouchableOpacity>
+        <Button onPress={handleLogin}>
+          <Text>Sign In</Text>
+        </Button>
+        <Button onPress={disconnectJellyfin}>
+          <Text>Disconnect</Text>
+        </Button>
       </View>
     </View>
   );
@@ -101,8 +97,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     gap: 12,
     paddingVertical: 12,
+    paddingHorizontal: 12,
   },
 })

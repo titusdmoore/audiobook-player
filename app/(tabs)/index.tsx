@@ -35,7 +35,7 @@ export default function Tab() {
       console.log(testing, "new 2")
       let downloadedBooks = await getDownloadedTitles(db);
       setDownloadedBooks(downloadedBooks);
-      console.log(downloadedBooks, "new")
+      console.log(downloadedBooks.length, "new")
 
       if (JSON.stringify(inProgressIdsDb) != JSON.stringify(inProgressIds)) {
         let books: any[] = [];

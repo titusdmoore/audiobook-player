@@ -25,15 +25,19 @@ export default function ListTitleCard({ index, item }: any) {
 export function ListTitleCardJelly({ index, item, horizontal }: any) {
 	const jellyfinProvider = useAppSelector(state => state.bookProvider);
 
+	console.log(item)
+
 	return (
 		<View style={horizontal ? styles.horizontalContainer : styles.verticalContainer} key={index}>
 			<Link href={{
 				pathname: '/[titleId]',
-				params: { titleId: item.Id }
+				params: { titleId: item.id ? item.id : item.Id }
 			}}>
 				<View style={{ justifyContent: 'center', alignItems: 'center' }}>
-					<Image source={`${jellyfinProvider.jellyfinDomain}/Items/${item.Id}/Images/Primary`} style={{ width: 125, height: 125 }} />
-					<Text style={{ color: PALETTE.text, fontSize: 16, textAlign: 'center', paddingTop: 6 }}>{item.Name}</Text>
+					{item.local_image_path
+						? (<Image source={item.local_image_path} style={{ width: 125, height: 125 }} />)
+						: (<Image source={`${jellyfinProvider.jellyfinDomain}/Items/${item.Id}/Images/Primary`} style={{ width: 125, height: 125 }} />)}
+					<Text style={{ color: PALETTE.text, fontSize: 16, textAlign: 'center', paddingTop: 6 }}>{item.name ? item.name : item.Name}</Text>
 				</View>
 			</Link>
 		</View>
