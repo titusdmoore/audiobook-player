@@ -105,6 +105,7 @@ export default function TitleView() {
   };
 
   useLayoutEffect(() => {
+    console.log(title, "title")
     navigation.setOptions({
       title: title?.Name ?? titleId
     })

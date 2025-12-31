@@ -5,6 +5,7 @@ import { Image } from "expo-image";
 import { useEffect } from "react";
 import { getInfoAsync } from "expo-file-system";
 import { Link } from "expo-router";
+import { Playable } from "@/utils/classes/playable";
 
 export default function ListTitleCard({ index, item }: any) {
 	// console.log(index, item)
@@ -22,22 +23,20 @@ export default function ListTitleCard({ index, item }: any) {
 	);
 }
 
-export function ListTitleCardJelly({ index, item, horizontal }: any) {
+export function ListTitleCardJelly({ index, item, horizontal }: { index: number, item: Playable, horizontal: boolean }) {
 	const jellyfinProvider = useAppSelector(state => state.bookProvider);
 
-	console.log(item)
+	console.log("jelly card item", item.imagePath)
 
 	return (
 		<View style={horizontal ? styles.horizontalContainer : styles.verticalContainer} key={index}>
 			<Link href={{
 				pathname: '/[titleId]',
-				params: { titleId: item.id ? item.id : item.Id }
+				params: { titleId: item.id }
 			}}>
 				<View style={{ justifyContent: 'center', alignItems: 'center' }}>
-					{item.local_image_path
-						? (<Image source={item.local_image_path} style={{ width: 125, height: 125 }} />)
-						: (<Image source={`${jellyfinProvider.jellyfinDomain}/Items/${item.Id}/Images/Primary`} style={{ width: 125, height: 125 }} />)}
-					<Text style={{ color: PALETTE.text, fontSize: 16, textAlign: 'center', paddingTop: 6 }}>{item.name ? item.name : item.Name}</Text>
+					<Image source={item.imagePath} style={{ width: 125, height: 125 }} />
+					<Text style={{ color: PALETTE.text, fontSize: 16, textAlign: 'center', paddingTop: 6 }}>{item.name}</Text>
 				</View>
 			</Link>
 		</View>

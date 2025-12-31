@@ -14,18 +14,21 @@ import { authenticateUserByName, fetchAudiobooks, fetchItem, Item } from "@/util
 import { SafeAreaView } from "react-native-safe-area-context";
 import { setAccessToken, setJellyfinUser } from "@/utils/slices/book-provider-slice";
 import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
+import { JellyPlayable } from "@/utils/classes/jelly-playable";
+import { DbPlayable } from "@/utils/classes/db-playable";
+import { ItemDb } from "@/utils/db/schema";
 
 // source = { require('@/assets/images/react-logo.png') }
 export default function Tab() {
   const [inProgressIds, setInProgressIds] = useState<{ title_id: string }[]>([]);
-  const [inProgressBooks, setInProgressBooks] = useState<Item[]>([]);
-  const [recentBooks, setRecentBooks] = useState<Item[]>([]);
+  const [inProgressBooks, setInProgressBooks] = useState<JellyPlayable[]>([]);
+  const [recentBooks, setRecentBooks] = useState<JellyPlayable[]>([]);
   const navigation = usePathname();
   const [booksJelly, setBooksJelly] = useState<any[]>([]);
-  const [downloadedBooks, setDownloadedBooks] = useState<any[]>([]);
+  const [downloadedBooks, setDownloadedBooks] = useState<DbPlayable[]>([]);
   const db = useSQLiteContext();
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
 
 
   useEffect(() => {
@@ -34,7 +37,7 @@ export default function Tab() {
       let testing = await db.getAllAsync('SELECT * FROM items WHERE parent_db_id IS NULL;');
       console.log(testing, "new 2")
       let downloadedBooks = await getDownloadedTitles(db);
-      setDownloadedBooks(downloadedBooks);
+      setDownloadedBooks((downloadedBooks as ItemDb[]).map((book: ItemDb) => new DbPlayable(book)));
       console.log(downloadedBooks.length, "new")
 
       if (JSON.stringify(inProgressIdsDb) != JSON.stringify(inProgressIds)) {
@@ -50,7 +53,7 @@ export default function Tab() {
         }
 
         if (books.length > 0) {
-          setInProgressBooks(books);
+          setInProgressBooks(books.map((item: Item) => new JellyPlayable(item, jellyfinProvider.jellyfinDomain ?? '')));
           setInProgressIds(inProgressIdsDb as any);
         }
       }
@@ -64,7 +67,7 @@ export default function Tab() {
 
         if (booksResponse && booksResponse.ok) {
           let books = await booksResponse.json();
-          setRecentBooks(books.Items);
+          setRecentBooks(books.Items.map((item: Item) => new JellyPlayable(item, jellyfinProvider.jellyfinDomain ?? '')));
         }
       }
     })().then(() => { });
@@ -72,27 +75,29 @@ export default function Tab() {
 
   return (
     <SafeAreaView style={styles.sectionContainer}>
-      <View style={styles.sectionTitleContainer}>
-        <TouchableOpacity style={styles.sectionTitleLink}>
-          <Text style={styles.sectionTitle}>Books In Progress</Text>
-          <FontAwesome6Pro name="angle-right" size={20} color={PALETTE.text} />
-        </TouchableOpacity>
-        <FlatList horizontal={true} data={inProgressBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
-      </View>
-      <View style={styles.sectionTitleContainer}>
-        <TouchableOpacity style={styles.sectionTitleLink}>
-          <Text style={styles.sectionTitle}>Recently Added Titles</Text>
-          <FontAwesome6Pro name="angle-right" size={20} color={PALETTE.text} />
-        </TouchableOpacity>
-        <FlatList horizontal={true} data={recentBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
-      </View>
-      <View style={styles.sectionTitleContainer}>
-        <TouchableOpacity style={styles.sectionTitleLink}>
-          <Text style={styles.sectionTitle}>Downloaded Titles</Text>
-          <FontAwesome6Pro name="angle-right" size={20} color={PALETTE.text} />
+      <ScrollView>
+        <View style={styles.sectionTitleContainer}>
+          <TouchableOpacity style={styles.sectionTitleLink}>
+            <Text style={styles.sectionTitle}>Books In Progress</Text>
+            <FontAwesome6Pro name="angle-right" size={20} color={PALETTE.text} />
+          </TouchableOpacity>
+          <FlatList horizontal={true} data={inProgressBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
+        </View>
+        <View style={styles.sectionTitleContainer}>
+          <TouchableOpacity style={styles.sectionTitleLink}>
+            <Text style={styles.sectionTitle}>Recently Added Titles</Text>
+            <FontAwesome6Pro name="angle-right" size={20} color={PALETTE.text} />
+          </TouchableOpacity>
+          <FlatList horizontal={true} data={recentBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
+        </View>
+        <View style={styles.sectionTitleContainer}>
+          <TouchableOpacity style={styles.sectionTitleLink}>
+            <Text style={styles.sectionTitle}>Downloaded Titles</Text>
+            <FontAwesome6Pro name="angle-right" size={20} color={PALETTE.text} />
+          </TouchableOpacity>
           <FlatList horizontal={true} data={downloadedBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
-        </TouchableOpacity>
-      </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

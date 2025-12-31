@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import { ListTitleCardJelly } from "@/components/molecules/ListTitleCard";
-import { authenticateUserByName, fetchAudiobooks } from "@/utils/book-providers/jellyfin";
+import { authenticateUserByName, fetchAudiobooks, Item } from "@/utils/book-providers/jellyfin";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { setAccessToken, setJellyfinUser } from "@/utils/slices/book-provider-slice";
 import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
 import { Storage } from "expo-sqlite/kv-store";
 import { getAppOption } from "@/utils/db/db";
 import { useSQLiteContext } from "expo-sqlite";
+import { JellyPlayable } from "@/utils/classes/jelly-playable";
 
 export default function Tab() {
   const [booksJelly, setBooksJelly] = useState<any[]>([]);
@@ -24,7 +25,7 @@ export default function Tab() {
 
     if (booksResponse && booksResponse.ok) {
       let additionalBooks = await booksResponse.json();
-      setBooksJelly([...booksJelly, ...additionalBooks.Items]);
+      setBooksJelly([...booksJelly, ...additionalBooks.Items.map((item: Item) => new JellyPlayable(item, jellyfinProvider.jellyfinDomain ?? ''))]);
     }
   };
 
@@ -35,7 +36,7 @@ export default function Tab() {
 
       if (booksResponse && booksResponse.ok) {
         let parsedResponse = await booksResponse.json();
-        setBooksJelly(parsedResponse.Items)
+        setBooksJelly(parsedResponse.Items.map((item: Item) => new JellyPlayable(item, jellyfinProvider.jellyfinDomain ?? '')))
       } else if (booksResponse && booksResponse.status == 401) {
         if (jellyfinProvider.jellyfinAccessToken) {
           let userResponse = await authenticateUserByName(
