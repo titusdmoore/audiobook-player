@@ -1,9 +1,25 @@
-import { SQLiteDatabase, SQLiteRunResult } from 'expo-sqlite';
+import { openDatabaseAsync, SQLiteDatabase, SQLiteRunResult, useSQLiteContext } from 'expo-sqlite';
 import { APP_OPTIONS, APP_OPTIONS_CONSTRAINT, AppOptionsDb, BOOK_CHAPTERS_CREATE, BOOK_PROVIDERS_CREATE, BookChapterDb, BookDb, BOOKS_TABLE_CREATE, ItemDb, ITEMS_CREATE, JELLYFIN_BOOK_PROGRESS_CREATE, JellyfinBookProgressDb } from './schema';
 import { getItemAsync, setItemAsync } from 'expo-secure-store';
 import { getRandomBytesAsync } from 'expo-crypto';
 
 export const ENCRYPTION_KEY_NAME = 'db_encryption_key';
+
+/* export async function callableWithDb(callback: CallableFunction, ...args: any[]) {
+	// Try to pass db using context, otherwise create db instance
+	try {
+		const db = useSQLiteContext();
+
+		return Promise.resolve(callback(...args, db));
+	} catch (_) {
+		const db = await openDatabaseAsync('abp_secure.db', {
+			useNewConnection: true
+		});
+
+		return Promise.resolve(callback(...args, db));
+	}
+} */
+
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 	// BUMP IF MIGRATION NEEDED
@@ -236,4 +252,14 @@ export async function createItem(db: SQLiteDatabase, item: ItemDb) {
 
 export async function getDownloadedTitles(db: SQLiteDatabase) {
 	return await db.getAllAsync('SELECT * FROM items WHERE parent_db_id IS NULL AND downloaded = 1;');
+}
+
+export async function getDownloadedTitleById(db: SQLiteDatabase, id: string): Promise<ItemDb | null> {
+	// Convert request to get by id
+	return await db.getFirstAsync('SELECT * FROM items WHERE id = ? AND downloaded = 1;', id);
+}
+
+export async function getChaptersForTitle(db: SQLiteDatabase, id: string): Promise<ItemDb[] | null> {
+	// Convert request to get by id
+	return await db.getAllAsync('SELECT * FROM items WHERE parent_db_id = ?;', id);
 }

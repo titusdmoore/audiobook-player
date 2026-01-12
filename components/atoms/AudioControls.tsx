@@ -1,7 +1,7 @@
 import { Animated, StyleSheet, TouchableOpacity, View } from "react-native";
 import { FontAwesome6Pro } from "@react-native-vector-icons/fontawesome6-pro";
 import { pauseCurrentTrack, playCurrentTrack } from "@/utils/audio-player";
-import { Event, State, useIsPlaying, usePlaybackState } from "react-native-track-player";
+import TrackPlayer, { Event, State, useIsPlaying, usePlaybackState } from "react-native-track-player";
 import { PALETTE } from "@/utils/colors";
 import { useRef } from "react";
 
@@ -38,10 +38,16 @@ function PlayButton({ scale }: { scale: number }) {
 			);
 		case State.Loading:
 		case State.Buffering:
-		case State.Error:
 			return (
 				<Animated.View style={{ transform: [{ rotate: spin }] }}>
 					<FontAwesome6Pro name="loader" style={{}} iconStyle="duotone" size={50 * scale} color={PALETTE.primary} />
+				</Animated.View>
+			)
+		case State.Error:
+			// TrackPlayer.play().then(() => { });
+			return (
+				<Animated.View style={{ transform: [{ rotate: spin }] }}>
+					<FontAwesome6Pro name="hose" style={{}} iconStyle="duotone" size={50 * scale} color={PALETTE.primary} />
 				</Animated.View>
 			)
 		default:

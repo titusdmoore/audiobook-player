@@ -9,19 +9,14 @@ import TrackPlayer, { PitchAlgorithm, Track } from "react-native-track-player";
 import { useLoadedAuthRequest } from "expo-auth-session";
 import { setActiveTitle } from "@/utils/slices/audio-player-slice";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { fetchPlayerDuration, setAppOption } from "@/utils/db/db";
+import { /* callableWithDb, */ fetchPlayerDuration, setAppOption } from "@/utils/db/db";
 import { useSQLiteContext } from "expo-sqlite";
 import { formatAudioProgressTime } from "@/utils/audio-player";
 import { Image } from "expo-image";
 import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
-import { encodeObjectToQueryParams } from "@/utils";
+import { encodeObjectToQueryParams, getPlayableById, fetchChildrenPlayables } from "@/utils";
+import { Playable } from "@/utils/classes/playable";
 
-function runTimeTicksToDuration(ticks: number): number {
-  let ms = Math.floor(ticks / 10000);
-  let seconds = Math.floor(ms / 1000);
-
-  return seconds;
-}
 
 function ChapterListItem({ index, item: chapter, playButtonAction }: { index: number, item: any, playButtonAction: any }) {
   return (
@@ -54,14 +49,14 @@ function ChaptersModal({ chapters, isOpen, setIsOpen, chapterSelect }: { chapter
 
 export default function TitleView() {
   const { titleId } = useLocalSearchParams();
-  const [chapters, setChapters] = useState<any[]>([]);
+  const [chapters, setChapters] = useState<Playable[]>([]);
   const [chaptersModalOpen, setChaptersModalOpen] = useState<boolean>(false);
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
   const dispatch = useAppDispatch();
   const db = useSQLiteContext();
   const navigation = useNavigation();
 
-  const [title, setTitle] = useState<any>(null);
+  const [playable, setPlayable] = useState<Playable | null>(null);
   const router = useRouter();
 
   const handleDowloadTitleClick = async () => {
@@ -75,63 +70,65 @@ export default function TitleView() {
     if (!startChapterIndex) {
       let duration = await fetchPlayerDuration(db, titleId as string);
       if (duration) {
-        startChapterIndex = chapters.findIndex((chapter) => chapter.Id == duration.chapter_id);
+        startChapterIndex = chapters.findIndex((chapter) => chapter.id == duration.chapter_id);
       } else {
         startChapterIndex = 0;
       }
     }
 
     for (const chapter of chapters.slice(startChapterIndex)) {
-      let track: Track = {
-        id: chapter.Id,
-        url: `${jellyfinProvider.jellyfinDomain}/Audio/${chapter.Id}/universal?TranscodingProtocol=hls&Container=m4b`,
-        headers: {
-          'Authorization': `MediaBrowser Token="${jellyfinProvider.jellyfinAccessToken}"`
-        },
-        title: chapter.Name,
-        artist: chapter.AlbumArtist,
-        // type: TrackType.HLS,
-        pitchAlgorithm: PitchAlgorithm.Voice,
-        duration: runTimeTicksToDuration(chapter.RunTimeTicks),
-        parentItemId: titleId,
-      };
-
+      // let track: Track = {
+      //   id: chapter.Id,
+      //   url: `${jellyfinProvider.jellyfinDomain}/Audio/${chapter.Id}/universal?TranscodingProtocol=hls&Container=m4b`,
+      //   headers: {
+      //     'Authorization': `MediaBrowser Token="${jellyfinProvider.jellyfinAccessToken}"`
+      //   },
+      //   title: chapter.Name,
+      //   artist: chapter.AlbumArtist,
+      //   // type: TrackType.HLS,
+      //   pitchAlgorithm: PitchAlgorithm.Voice,
+      //   duration: runTimeTicksToDuration(chapter.RunTimeTicks),
+      //   parentItemId: titleId,
+      // };
+      //
+      let track = chapter.toTrack();
+      console.log("track", track)
       await TrackPlayer.add(track);
     }
 
     await setAppOption(db, "new_title_loaded", "true");
-    dispatch(setActiveTitle(title))
+    dispatch(setActiveTitle({ name: playable?.name, imagePath: playable?.imagePath }))
     router.navigate("/player");
   };
 
   useLayoutEffect(() => {
-    console.log(title, "title")
     navigation.setOptions({
-      title: title?.Name ?? titleId
+      title: playable?.name
     })
-  }, [navigation, title]);
+  }, [navigation, playable]);
 
   useEffect(() => {
     (async () => {
-      let chaptersRaw = await fetchAudiobooks(jellyfinProvider.jellyfinDomain ?? '', jellyfinProvider.jellyfinAccessToken ?? '', { limit: 100, startIndex: 0, parentId: titleId as string });
-      let titleRes = await fetchItem(jellyfinProvider.jellyfinDomain ?? '', jellyfinProvider.jellyfinAccessToken ?? '', jellyfinProvider.jellyfinUser?.Id, titleId as string);
+      let jellyConfig = {
+        domain: jellyfinProvider.jellyfinDomain ?? '',
+        accessToken: jellyfinProvider.jellyfinAccessToken ?? '',
+        userId: jellyfinProvider.jellyfinUser?.Id
+      };
+      let playableRes = await getPlayableById(titleId as string, jellyConfig, db)
+      setPlayable(playableRes);
 
-      if (titleRes.ok) {
-        setTitle(await titleRes.json());
-      }
-
-      if (chaptersRaw && chaptersRaw.ok) {
-        let chaptersParsed = await chaptersRaw.json();
-        setChapters(chaptersParsed.Items);
+      if (playableRes) {
+        let chapters = await fetchChildrenPlayables(playableRes, db, jellyConfig);
+        setChapters(chapters);
       }
     })().then(() => { });
   }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image source={`${jellyfinProvider.jellyfinDomain}/Items/${titleId}/Images/Primary`} style={{ width: 225, height: 225 }} />
+      <Image source={playable?.imagePath} style={{ width: 225, height: 225 }} />
       <View style={styles.metaContainer}>
-        <Text style={styles.titleText}>{title?.Name}</Text>
+        <Text style={styles.titleText}>{playable?.name}</Text>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={[styles.buttonRoot, styles.chapterListButton]} onPress={() => setChaptersModalOpen(!chaptersModalOpen)}>
             <Text style={styles.chapterListButtonText}>View Chapters</Text>
@@ -140,9 +137,15 @@ export default function TitleView() {
             <Text style={styles.playTitleButtonText}>Play Title</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={[styles.buttonRoot, styles.chapterListButton]} onPress={handleDowloadTitleClick}>
-          <Text style={styles.playTitleButtonText}>Download Title</Text>
-        </TouchableOpacity>
+        {playable?.isDownloaded() ? (
+          <TouchableOpacity style={[styles.buttonRoot, styles.chapterListButton]} onPress={handleDowloadTitleClick}>
+            <Text style={styles.playTitleButtonText}>Remove from Device</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={[styles.buttonRoot, styles.chapterListButton]} onPress={handleDowloadTitleClick}>
+            <Text style={styles.playTitleButtonText}>Download Title</Text>
+          </TouchableOpacity>
+        )}
       </View>
       <ChaptersModal chapters={chapters} isOpen={chaptersModalOpen} setIsOpen={setChaptersModalOpen} chapterSelect={loadTracksForTitle} />
     </SafeAreaView>

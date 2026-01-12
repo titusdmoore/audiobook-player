@@ -9,8 +9,9 @@ import AudioControls, { ControlsType } from "@/components/atoms/AudioControls";
 import { useEffect, useState } from "react";
 import TrackPlayer from "react-native-track-player";
 import HeaderBar from "@/components/molecules/HeaderBar";
+import { Playable } from "@/utils/classes/playable";
 
-function GlobalAudioControls({ title }: any) {
+function GlobalAudioControls({ title }: { title: Playable }) {
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
   const [activeTrack, setActiveTrack] = useState<any>();
 
@@ -28,9 +29,9 @@ function GlobalAudioControls({ title }: any) {
     <Link href="/player">
       <View style={{ width: '100%', borderColor: 'red', borderWidth: 1, flexDirection: 'row', justifyContent: 'space-between', padding: 10 }}>
         <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-          <Image source={`${jellyfinProvider.jellyfinDomain}/Items/${title.Id}/Images/Primary`} style={{ width: 50, height: 50 }} />
+          <Image source={title.imagePath} style={{ width: 50, height: 50 }} />
           <View style={{ maxWidth: '70%' }}>
-            <Text style={{ color: PALETTE.text, fontSize: 16 }}>{title.Name}</Text>
+            <Text style={{ color: PALETTE.text, fontSize: 16 }}>{title.name}</Text>
             {activeTrack && (<Text style={{ color: PALETTE.text, fontSize: 12 }}>{activeTrack.title}</Text>)}
           </View>
         </View>

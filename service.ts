@@ -1,5 +1,5 @@
 import { openDatabaseAsync } from "expo-sqlite";
-import TrackPlayer, { Event, PlaybackActiveTrackChangedEvent, PlaybackProgressUpdatedEvent, PlaybackState, State } from "react-native-track-player";
+import TrackPlayer, { Event, PlaybackActiveTrackChangedEvent, PlaybackErrorEvent, PlaybackProgressUpdatedEvent, PlaybackState, State } from "react-native-track-player";
 import { createTitleDuration, fetchPlayerDuration, getAppOption, getOrCreateDatabaseKey, setAppOption, updateTitleDuration } from "./utils/db/db";
 import { JellyfinBookProgressDb } from "./utils/db/schema";
 
@@ -19,6 +19,12 @@ export const PlaybackService = async () => {
   TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause());
   TrackPlayer.addEventListener(Event.RemoteNext, () => TrackPlayer.skipToNext());
   TrackPlayer.addEventListener(Event.RemotePrevious, () => TrackPlayer.skipToPrevious());
+  TrackPlayer.addEventListener(Event.PlayerError, async (event: PlaybackErrorEvent) => {
+    console.log("player", event)
+  });
+  TrackPlayer.addEventListener(Event.PlaybackError, async (event: PlaybackErrorEvent) => {
+    console.log("playback", event)
+  });
   TrackPlayer.addEventListener(Event.PlaybackState, async (event: PlaybackState) => {
     let newTitleLoaded = await getAppOption(db, 'new_title_loaded');
     let queue = await TrackPlayer.getQueue();

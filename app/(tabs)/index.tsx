@@ -39,6 +39,12 @@ export default function Tab() {
       let downloadedBooks = await getDownloadedTitles(db);
       setDownloadedBooks((downloadedBooks as ItemDb[]).map((book: ItemDb) => new DbPlayable(book)));
       console.log(downloadedBooks.length, "new")
+      console.log(downloadedBooks)
+      let config = {
+        domain: jellyfinProvider.jellyfinDomain ?? '',
+        accessToken: jellyfinProvider.jellyfinAccessToken ?? '',
+        userId: jellyfinProvider.jellyfinUser?.Id,
+      };
 
       if (JSON.stringify(inProgressIdsDb) != JSON.stringify(inProgressIds)) {
         let books: any[] = [];
@@ -53,7 +59,7 @@ export default function Tab() {
         }
 
         if (books.length > 0) {
-          setInProgressBooks(books.map((item: Item) => new JellyPlayable(item, jellyfinProvider.jellyfinDomain ?? '')));
+          setInProgressBooks(books.map((item: Item) => new JellyPlayable(item, config)));
           setInProgressIds(inProgressIdsDb as any);
         }
       }
@@ -67,7 +73,7 @@ export default function Tab() {
 
         if (booksResponse && booksResponse.ok) {
           let books = await booksResponse.json();
-          setRecentBooks(books.Items.map((item: Item) => new JellyPlayable(item, jellyfinProvider.jellyfinDomain ?? '')));
+          setRecentBooks(books.Items.map((item: Item) => new JellyPlayable(item, config)));
         }
       }
     })().then(() => { });

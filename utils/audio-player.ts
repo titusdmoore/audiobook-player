@@ -5,6 +5,7 @@ import TrackPlayer, { Event, PlaybackActiveTrackChangedEvent, PlaybackProgressUp
 // }
 //
 export async function playCurrentTrack() {
+	console.log("here", await TrackPlayer.getQueue());
 	await TrackPlayer.play();
 }
 
@@ -24,3 +25,9 @@ export function formatAudioProgressTime(time: number): string {
 	return Math.floor(time / 60).toString() + ":" + Math.floor(time % 60).toString().padStart(2, '0');
 }
 
+export function runTimeTicksToDuration(ticks: number): number {
+	let ms = Math.floor(ticks / 10000);
+	let seconds = Math.floor(ms / 1000);
+
+	return seconds;
+}

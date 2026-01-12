@@ -8,10 +8,9 @@ import { Image } from "expo-image";
 import { PALETTE } from "@/utils/colors";
 import { reportItemPlaying } from "@/utils/book-providers/jellyfin";
 import { formatAudioProgressTime } from "@/utils/audio-player";
+import { Playable } from "@/utils/classes/playable";
 
-export function TitleImage({ sleepTimer, activeTitle }: { sleepTimer: number | null, activeTitle: any }) {
-  const jellyfinProvider = useAppSelector(state => state.bookProvider);
-
+export function TitleImage({ sleepTimer, activeTitle }: { sleepTimer: number | null, activeTitle?: Playable }) {
   if (sleepTimer !== null) {
     console.log('sleep timer', sleepTimer)
     return (
@@ -19,14 +18,14 @@ export function TitleImage({ sleepTimer, activeTitle }: { sleepTimer: number | n
         <View style={styles.sleepTimerContainer}>
           <Text style={styles.sleepTimerText}>{formatAudioProgressTime(sleepTimer)}</Text>
         </View>
-        <Image source={`${jellyfinProvider.jellyfinDomain}/Items/${(activeTitle as any).Id}/Images/Primary`} style={styles.image} />
+        <Image source={activeTitle?.imagePath} style={styles.image} />
       </View>
     );
   }
 
   return (
     <>
-      {activeTitle && (<Image source={`${jellyfinProvider.jellyfinDomain}/Items/${(activeTitle as any).Id}/Images/Primary`} style={styles.image} />)}
+      {activeTitle && (<Image source={activeTitle.imagePath} style={styles.image} />)}
     </>
   );
 }
@@ -72,8 +71,8 @@ export default function Modal() {
   return (
     <View style={styles.rootContainer}>
       {remainingSleepTimer && (<Text style={{ color: PALETTE.text }}>{formatAudioProgressTime(remainingSleepTimer)}</Text>)}
-      <TitleImage sleepTimer={remainingSleepTimer} activeTitle={audioPlayer.activeTitle} />
-      {(activeTrack && activeTrack.title) && (<Text style={styles.title}>{activeTrack?.title}</Text>)}
+      <TitleImage sleepTimer={remainingSleepTimer} activeTitle={audioPlayer.activeTitle as any} />
+      {(activeTrack && activeTrack.name) && (<Text style={styles.title}>{activeTrack?.name}</Text>)}
       <PlaybackControls />
     </View>
   );

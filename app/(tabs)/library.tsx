@@ -25,7 +25,11 @@ export default function Tab() {
 
     if (booksResponse && booksResponse.ok) {
       let additionalBooks = await booksResponse.json();
-      setBooksJelly([...booksJelly, ...additionalBooks.Items.map((item: Item) => new JellyPlayable(item, jellyfinProvider.jellyfinDomain ?? ''))]);
+      setBooksJelly([...booksJelly, ...additionalBooks.Items.map((item: Item) => new JellyPlayable(item, {
+        domain: jellyfinProvider.jellyfinDomain ?? '',
+        accessToken: jellyfinProvider.jellyfinAccessToken ?? '',
+        userId: jellyfinProvider.jellyfinUser?.Id
+      }))]);
     }
   };
 
@@ -36,7 +40,12 @@ export default function Tab() {
 
       if (booksResponse && booksResponse.ok) {
         let parsedResponse = await booksResponse.json();
-        setBooksJelly(parsedResponse.Items.map((item: Item) => new JellyPlayable(item, jellyfinProvider.jellyfinDomain ?? '')))
+
+        setBooksJelly(parsedResponse.Items.map((item: Item) => new JellyPlayable(item, {
+          domain: jellyfinProvider.jellyfinDomain ?? '',
+          accessToken: jellyfinProvider.jellyfinAccessToken ?? '',
+          userId: jellyfinProvider.jellyfinUser?.Id,
+        })));
       } else if (booksResponse && booksResponse.status == 401) {
         if (jellyfinProvider.jellyfinAccessToken) {
           let userResponse = await authenticateUserByName(
@@ -76,7 +85,7 @@ export default function Tab() {
         numColumns={2}
         onEndReached={fetchMoreBooks}
         onEndReachedThreshold={.7}
-        renderItem={(item) => <ListTitleCardJelly {...item} />}
+        renderItem={(item) => <ListTitleCardJelly {...item} horizontal={true} />}
       />
     </SafeAreaView>
   );
