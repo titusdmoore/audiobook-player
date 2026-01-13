@@ -69,11 +69,12 @@ export type ItemDb = {
 	duration: number | null;
 	sort_name: string;
 	remote_path: string;
+	artist: string | null;
 
 	// Local Storage Fields
 	local_path: string | null;
 	local_image_path: string | null;
-	downloaded: boolean;
+	downloaded: number;
 
 	// Helper Fields
 	parent_db_id: number | null;
@@ -94,6 +95,7 @@ export const ITEMS_CREATE = `CREATE TABLE items(
 	duration INTEGER,
 	parent_id TEXT,
 	remote_path TEXT NOT NULL,
+	artist TEXT,
 
 	local_path TEXT,
 	downloaded INTEGER NOT NULL,

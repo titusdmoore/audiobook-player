@@ -9,6 +9,8 @@ import { PALETTE } from "@/utils/colors";
 import { reportItemPlaying } from "@/utils/book-providers/jellyfin";
 import { formatAudioProgressTime } from "@/utils/audio-player";
 import { Playable } from "@/utils/classes/playable";
+import { getAppOption } from "@/utils/db/db";
+import { useSQLiteContext } from "expo-sqlite";
 
 export function TitleImage({ sleepTimer, activeTitle }: { sleepTimer: number | null, activeTitle?: Playable }) {
   if (sleepTimer !== null) {
@@ -36,9 +38,11 @@ export default function Modal() {
   const audioPlayer = useAppSelector(state => state.audioPlayer);
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
   const activeTrack = useActiveTrack();
+  // TODO: convert to context
   const [remainingSleepTimer, setRemainingSleepTimer] = useState<number | null>(null);
+  const db = useSQLiteContext();
 
-  useEffect(() => {
+  const handleSleepTimerDisplay = () => {
     if (jellyfinProvider.sleepTimer) {
       const timerInterval = setInterval(() => {
         setRemainingSleepTimer((prevTime) => {
@@ -66,13 +70,25 @@ export default function Modal() {
       // Cleanup the interval when the component unmounts
       return () => clearInterval(timerInterval);
     }
+  };
+
+  useEffect(() => {
+    console.log("hello, world")
+    console.log(jellyfinProvider.sleepTimer)
+    handleSleepTimerDisplay();
   }, [jellyfinProvider.sleepTimer]);
+
+  useEffect(() => {
+    if (!remainingSleepTimer) {
+      handleSleepTimerDisplay();
+    }
+  }, []);
 
   return (
     <View style={styles.rootContainer}>
       {remainingSleepTimer && (<Text style={{ color: PALETTE.text }}>{formatAudioProgressTime(remainingSleepTimer)}</Text>)}
       <TitleImage sleepTimer={remainingSleepTimer} activeTitle={audioPlayer.activeTitle as any} />
-      {(activeTrack && activeTrack.name) && (<Text style={styles.title}>{activeTrack?.name}</Text>)}
+      {(activeTrack && activeTrack.title) && (<Text style={styles.title}>{activeTrack?.title}</Text>)}
       <PlaybackControls />
     </View>
   );

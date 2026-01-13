@@ -34,12 +34,8 @@ export default function Tab() {
   useEffect(() => {
     (async () => {
       let inProgressIdsDb = await db.getAllAsync('SELECT title_id FROM jellyfin_book_progress LIMIT 10;');
-      let testing = await db.getAllAsync('SELECT * FROM items WHERE parent_db_id IS NULL;');
-      console.log(testing, "new 2")
       let downloadedBooks = await getDownloadedTitles(db);
       setDownloadedBooks((downloadedBooks as ItemDb[]).map((book: ItemDb) => new DbPlayable(book)));
-      console.log(downloadedBooks.length, "new")
-      console.log(downloadedBooks)
       let config = {
         domain: jellyfinProvider.jellyfinDomain ?? '',
         accessToken: jellyfinProvider.jellyfinAccessToken ?? '',

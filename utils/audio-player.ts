@@ -5,7 +5,6 @@ import TrackPlayer, { Event, PlaybackActiveTrackChangedEvent, PlaybackProgressUp
 // }
 //
 export async function playCurrentTrack() {
-	console.log("here", await TrackPlayer.getQueue());
 	await TrackPlayer.play();
 }
 

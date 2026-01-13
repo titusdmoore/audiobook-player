@@ -28,7 +28,7 @@ export class DbPlayable extends Playable {
 	}
 
 	isDownloaded(): boolean {
-		return this.#dbItem.downloaded;
+		return this.#dbItem.downloaded == 1;
 	}
 
 	isParentPlayable(): boolean {

@@ -19,12 +19,6 @@ export const PlaybackService = async () => {
   TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause());
   TrackPlayer.addEventListener(Event.RemoteNext, () => TrackPlayer.skipToNext());
   TrackPlayer.addEventListener(Event.RemotePrevious, () => TrackPlayer.skipToPrevious());
-  TrackPlayer.addEventListener(Event.PlayerError, async (event: PlaybackErrorEvent) => {
-    console.log("player", event)
-  });
-  TrackPlayer.addEventListener(Event.PlaybackError, async (event: PlaybackErrorEvent) => {
-    console.log("playback", event)
-  });
   TrackPlayer.addEventListener(Event.PlaybackState, async (event: PlaybackState) => {
     let newTitleLoaded = await getAppOption(db, 'new_title_loaded');
     let queue = await TrackPlayer.getQueue();
@@ -47,7 +41,6 @@ export const PlaybackService = async () => {
   TrackPlayer.addEventListener(Event.PlaybackProgressUpdated, async (event: PlaybackProgressUpdatedEvent) => {
     let trackObject = await TrackPlayer.getTrack(event.track);
     let duration = await fetchPlayerDuration(db, trackObject?.parentItemId);
-
 
     let sleepTimerResult = await getAppOption(db, 'sleep_timer');
     if (sleepTimerResult && sleepTimerResult.option_value) {

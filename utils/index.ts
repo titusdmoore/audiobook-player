@@ -14,6 +14,10 @@ export default async function startup(dispatch: any, audioPlayer: any, bookProvi
 	console.log("hello, world");
 }
 
+export function convertToValidFilename(input: string): string {
+	return (input.replace(/[\/|\\:*?"\ <>]/g, ""));
+}
+
 export function encodeObjectToQueryParams(object: { [key: string]: any }): string {
 	var str = [];
 	for (var property in object) {
@@ -40,7 +44,9 @@ export async function getPlayableById(id: string, fetchOptions: FetchItemOptions
 
 	let jellyTitleRes = await fetchItem(fetchOptions.domain, fetchOptions.accessToken, fetchOptions.userId, id);
 	if (jellyTitleRes.ok) {
-		return new JellyPlayable(await jellyTitleRes.json(), fetchOptions);
+		let res = await jellyTitleRes.json();
+		console.log(res)
+		return new JellyPlayable(res, fetchOptions);
 	}
 
 	return null;
@@ -65,6 +71,7 @@ export async function fetchChildrenPlayables(playable: Playable, db: SQLiteDatab
 		if (chaptersRes && chaptersRes.ok) {
 			console.log("here")
 			let chaptersResParsed: { Items: Item[] } = await chaptersRes.json();
+			console.log("hi", chaptersResParsed)
 
 			return chaptersResParsed.Items.map((item) => new JellyPlayable(item, config));
 		}

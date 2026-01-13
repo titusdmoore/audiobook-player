@@ -1,7 +1,7 @@
 // import { fetch } from "expo/fetch";
 
 import { SQLiteDatabase } from "expo-sqlite";
-import { encodeObjectToQueryParams } from "..";
+import { convertToValidFilename, encodeObjectToQueryParams } from "..";
 import { getAudiobookDir, mimeToExtension, ROOT_AUDIOBOOK_DIR } from "../file-system";
 import { File } from "expo-file-system";
 import { createItem } from "../db/db";
@@ -148,6 +148,7 @@ export async function downloadTitle(db: SQLiteDatabase, domain: string, accessTo
 			local_image_path: imageRes.uri,
 			downloaded: 1,
 			parent_db_id: null,
+			artist: null,
 		});
 
 		let audiobooksRes = await fetchAudiobooks(domain, accessToken, { parentId: titleId, limit: parentTitle.RecursiveItemCount });
@@ -170,6 +171,13 @@ export async function downloadTitle(db: SQLiteDatabase, domain: string, accessTo
 					}
 				}
 			);
+
+			// Expo Downloads to universal.m4a, so we need to rename to chapter to prevent same track from being repeatedly played.
+			let currentFileName = chapterFileRes.uri.split('/').pop();
+			let fileExtension = currentFileName?.split('.').pop();
+			chapterFileRes.move(new File(titleDir, convertToValidFilename(audiobookChapter.Name) + `.${fileExtension}`));
+
+			console.log("testing audiobook", audiobookChapter)
 			let chapterDbRes = await createItem(db, {
 				name: audiobookChapter.Name,
 				server_id: audiobookChapter.ServerId,
@@ -178,7 +186,7 @@ export async function downloadTitle(db: SQLiteDatabase, domain: string, accessTo
 				date_last_media_added: audiobookChapter.DateLastMediaAdded,
 				can_delete: audiobookChapter.CanDelete == 'true' ? 1 : 0,
 				can_download: audiobookChapter.CanDownload == 'true' ? 1 : 0,
-				parent_id: audiobookChapter.ParentId,
+				parent_id: titleId,
 				id: audiobookChapter.Id,
 				duration: audiobookChapter.RunTimeTicks,
 				sort_name: audiobookChapter.SortName,
@@ -186,6 +194,7 @@ export async function downloadTitle(db: SQLiteDatabase, domain: string, accessTo
 				local_path: chapterFileRes.uri,
 				local_image_path: imageRes.uri,
 				downloaded: 1,
+				artist: audiobookChapter.AlbumArtist,
 
 				parent_db_id: titleDbRes.lastInsertRowId,
 			});
@@ -201,10 +210,17 @@ export async function downloadTitle(db: SQLiteDatabase, domain: string, accessTo
 
 	} catch (error) {
 		console.error(error)
-		// cleanup dir if created
+		// TODO: cleanup dir if created
 		// cleanup db if changed
 	}
+}
 
+export default async function removeTitleFromDevice(db: SQLiteDatabase, titleId: string) {
+	try {
+
+	} catch (e) {
+		console.error(e);
+	}
 }
 
 export type Item = {
