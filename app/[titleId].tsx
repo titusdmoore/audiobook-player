@@ -1,8 +1,8 @@
 import { downloadTitle, fetchAudiobooks, fetchItem } from "@/utils/book-providers/jellyfin";
 import { PALETTE } from "@/utils/colors";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useEffect, useLayoutEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import { Fragment, useEffect, useLayoutEffect, useState } from "react";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, ScrollView } from "react-native";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import { Button } from "@react-navigation/elements";
 import TrackPlayer, { PitchAlgorithm, Track } from "react-native-track-player";
@@ -16,6 +16,7 @@ import { Image } from "expo-image";
 import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 import { encodeObjectToQueryParams, getPlayableById, fetchChildrenPlayables } from "@/utils";
 import { Playable } from "@/utils/classes/playable";
+import Slider from "@react-native-community/slider";
 
 
 function ChapterListItem({ index, item: chapter, playButtonAction }: { index: number, item: Playable, playButtonAction: any }) {
@@ -47,6 +48,24 @@ function ChaptersModal({ chapters, isOpen, setIsOpen, chapterSelect }: { chapter
   );
 }
 
+export function TitleHeader({ navigation, route, options, back }: any) {
+  return (
+    <SafeAreaView style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 24, justifyContent: 'space-between' }}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
+        <FontAwesome6Pro name="arrow-left" iconStyle="solid" size={16} color={PALETTE.textWhite} />
+      </TouchableOpacity>
+      <View style={{ flexDirection: 'row', gap: 6 }}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
+          <FontAwesome6Pro name="share-nodes" size={16} color={PALETTE.textWhite} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
+          <FontAwesome6Pro name="heart" size={16} color={PALETTE.textWhite} />
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
+}
+
 export default function TitleView() {
   const { titleId } = useLocalSearchParams();
   const [chapters, setChapters] = useState<Playable[]>([]);
@@ -59,8 +78,25 @@ export default function TitleView() {
   const [playable, setPlayable] = useState<Playable | null>(null);
   const router = useRouter();
 
+  const bookInformation = [
+    { key: 'Narrator', value: 'Carey Mulligan', icon: 'microphone' },
+    { key: 'Release Date', value: 'August 13, 2020', icon: 'calendar' },
+    { key: 'Language', value: 'English', icon: 'subtitles' },
+    { key: 'Publisher', value: 'Penguin Audio', icon: 'building' },
+  ]
+
+  let jellyConfig = {
+    domain: jellyfinProvider.jellyfinDomain ?? '',
+    accessToken: jellyfinProvider.jellyfinAccessToken ?? '',
+    userId: jellyfinProvider.jellyfinUser?.Id
+  };
+
   const handleDowloadTitleClick = async () => {
     downloadTitle(db, jellyfinProvider.jellyfinDomain ?? '', jellyfinProvider.jellyfinAccessToken ?? '', jellyfinProvider.jellyfinUser?.Id, titleId as string)
+
+    let playableRes = await getPlayableById(titleId as string, jellyConfig, db)
+    setPlayable(playableRes);
+    // when completed, update db download thingy
   };
 
   const loadTracksForTitle = async (startChapterIndex?: number) => {
@@ -108,11 +144,6 @@ export default function TitleView() {
 
   useEffect(() => {
     (async () => {
-      let jellyConfig = {
-        domain: jellyfinProvider.jellyfinDomain ?? '',
-        accessToken: jellyfinProvider.jellyfinAccessToken ?? '',
-        userId: jellyfinProvider.jellyfinUser?.Id
-      };
       let playableRes = await getPlayableById(titleId as string, jellyConfig, db)
       setPlayable(playableRes);
 
@@ -124,30 +155,144 @@ export default function TitleView() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Image source={playable?.imagePath} style={{ width: 225, height: 225 }} />
-      <View style={styles.metaContainer}>
-        <Text style={styles.titleText}>{playable?.name}</Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={[styles.buttonRoot, styles.chapterListButton]} onPress={() => setChaptersModalOpen(!chaptersModalOpen)}>
-            <Text style={styles.chapterListButtonText}>View Chapters</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.buttonRoot, styles.playTitleButton]} onPress={() => loadTracksForTitle()}>
-            <Text style={styles.playTitleButtonText}>Play Title</Text>
-          </TouchableOpacity>
+    <ScrollView>
+      <View style={styles.container}>
+        <Image source={playable?.imagePath} style={{ width: 335, height: 335, borderRadius: 10, margin: 'auto' }} />
+        <View style={styles.metaContainer}>
+          <View>
+            <Text style={styles.titleText}>{playable?.name}</Text>
+            <Text style={styles.authorText}>Eric Metaxas</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 24, marginBottom: 12 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <FontAwesome6Pro name="star" iconStyle="solid" size={12} color={'#FACC15'} />
+                <Text style={{ fontFamily: 'Inter_500Medium', color: PALETTE.textWhite }}>4.8</Text>
+                <Text style={{ fontFamily: 'Inter_400Regular', color: PALETTE.textOffWhite }}>(12.4k)</Text>
+              </View>
+              <Text style={{ fontFamily: 'Inter_400Regular', color: PALETTE.textOffWhite }}>8h 32m</Text>
+            </View>
+            <View style={{ flexDirection: 'row', marginBottom: 12, gap: 6, justifyContent: 'center' }}>
+              {['Fiction', 'Fantasy', 'Philosophy'].map((item, index) => (
+                <View style={{ backgroundColor: 'rgba(108, 92, 231, .2)', borderRadius: 40, paddingHorizontal: 8 }} key={index}>
+                  <Text style={{ fontFamily: 'Inter_300Light', color: PALETTE.primary, textAlign: 'center' }}>{item}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={[styles.buttonRoot, styles.playTitleButton]} onPress={() => loadTracksForTitle()}>
+              <FontAwesome6Pro name="play" iconStyle="solid" size={15} color={PALETTE.text} />
+              <Text style={styles.playTitleButtonText}>Play Now</Text>
+            </TouchableOpacity>
+            {playable?.isDownloaded() || true ? (
+              <TouchableOpacity style={[styles.buttonRoot, styles.downloadButton]} onPress={handleDowloadTitleClick}>
+                <FontAwesome6Pro name="file-slash" iconStyle="solid" size={15} color={PALETTE.primary} />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={[styles.buttonRoot, styles.downloadButton]} onPress={handleDowloadTitleClick}>
+                <FontAwesome6Pro name="download" iconStyle="duotone" size={15} color={PALETTE.primary} />
+              </TouchableOpacity>
+            )}
+          </View>
+          <View style={{ backgroundColor: PALETTE.backgroundLight, borderRadius: 10, padding: 12, marginBottom: 24 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ color: PALETTE.textOffWhite, fontFamily: 'Inter_500Medium', fontSize: 15 }}>Your Progress</Text>
+              <Text style={{ color: PALETTE.primary, fontFamily: 'Inter_500Medium', fontSize: 15 }}>42%</Text>
+            </View>
+            <View>
+              <Slider
+                style={{ width: '100%', height: 55 }}
+                minimumValue={0}
+                maximumValue={100}
+                value={45}
+                minimumTrackTintColor={PALETTE.primary}
+                maximumTrackTintColor={PALETTE.background}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ color: PALETTE.textOffWhite, fontFamily: 'Inter_400Regular', fontSize: 12 }}>3h 36m completed</Text>
+              <Text style={{ color: PALETTE.textOffWhite, fontFamily: 'Inter_400Regular', fontSize: 12 }}>4h 56m remaining</Text>
+            </View>
+          </View>
         </View>
-        {playable?.isDownloaded() ? (
-          <TouchableOpacity style={[styles.buttonRoot, styles.chapterListButton]} onPress={handleDowloadTitleClick}>
-            <Text style={styles.playTitleButtonText}>Remove from Device</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={[styles.buttonRoot, styles.chapterListButton]} onPress={handleDowloadTitleClick}>
-            <Text style={styles.playTitleButtonText}>Download Title</Text>
-          </TouchableOpacity>
-        )}
+        <View style={styles.additionalSectionContainer}>
+          <View style={styles.additionalSectionHeader}>
+            <Text style={styles.titleSectionHeader}>About This Book</Text>
+          </View>
+          <View style={styles.aboutBookTextContainer}>
+            <Text style={styles.aboutBookText}>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae varius enim, at efficitur lacus. Fusce luctus faucibus ligula, id condimentum...
+            </Text>
+            <TouchableOpacity>
+              <Text style={{ fontFamily: 'Inter_500Medium', color: PALETTE.primary }}>Read More</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.additionalSectionContainer}>
+          <View style={styles.additionalSectionHeader}>
+            <Text style={styles.titleSectionHeader}>Book Information</Text>
+          </View>
+          <View style={styles.bookInfoContainer}>
+            {bookInformation.map((item, index) => (
+              <Fragment key={index}>
+                <View style={styles.bookInfoEntry}>
+                  <View style={{ backgroundColor: 'rgba(108, 92, 231, .2)', width: 40, height: 40, borderRadius: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                    <FontAwesome6Pro name={item.icon as any} iconStyle="solid" size={20} color={PALETTE.primary} />
+                  </View>
+                  <View style={{ width: '100%' }}>
+                    <Text style={{ color: PALETTE.textOffWhite, fontFamily: 'Inter_400Regular', width: '100%', flex: 1 }}>{item.key}</Text>
+                    <Text style={{ color: PALETTE.textWhite, fontFamily: 'Inter_500Medium', width: '100%' }}>{item.value}</Text>
+                  </View>
+                </View>
+                {index != bookInformation.length - 1 && (<View style={{ width: '95%', height: 1, marginVertical: 16, backgroundColor: '#252530', marginHorizontal: 'auto' }}></View>)}
+              </Fragment>
+            ))}
+          </View>
+        </View>
+        <View style={styles.additionalSectionContainer}>
+          <View style={styles.additionalSectionHeader}>
+            <Text style={styles.titleSectionHeader}>Chapters</Text>
+            <Text style={styles.chaptersFeatureChapterCount}>{chapters.length} Chapters</Text>
+          </View>
+          <View style={styles.chaptersContainer}>
+            {chapters.slice(0, 5).map((chapter, index) => (
+              <View style={styles.chapterContainer} key={index}>
+                <View style={{ width: 40, height: 40, backgroundColor: PALETTE.background, borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ color: PALETTE.textOffWhite, fontSize: 18, fontFamily: 'Inter_400Regular' }}>{index + 1}</Text>
+                </View>
+                <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 12, alignItems: 'center' }}>
+                  <View style={{ maxWidth: '75%' }}>
+                    <Text style={{ fontFamily: 'Inter_400Regular', color: PALETTE.textWhite, fontSize: 14, wordWrap: 'break-word' }}>{chapter.name}</Text>
+                    <Text style={{ fontFamily: 'Inter_300Light', color: PALETTE.textOffWhite, }}>{formatAudioProgressTime(chapter.getDuration())}</Text>
+                  </View>
+                  <TouchableOpacity>
+                    <FontAwesome6Pro name='ellipsis-vertical' iconStyle="solid" size={20} color={PALETTE.textWhite} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+            <TouchableOpacity style={{ width: '100%', justifyContent: 'center', alignItems: 'center', padding: 16 }}>
+              <Text style={{ fontFamily: 'Inter_400Regular', color: PALETTE.primary, fontSize: 14 }}>View All Chapters</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.additionalSectionContainer}>
+          <View style={styles.additionalSectionHeader}>
+            <Text style={styles.titleSectionHeader}>Reviews</Text>
+            <TouchableOpacity>
+              <Text style={{ fontFamily: 'Inter_400Regular', color: PALETTE.primary, fontSize: 14 }}>See All</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.additionalSectionContainer}>
+          <View style={styles.additionalSectionHeader}>
+            <Text style={styles.titleSectionHeader}>Similar Audiobooks</Text>
+            <TouchableOpacity>
+              <Text style={{ fontFamily: 'Inter_400Regular', color: PALETTE.primary, fontSize: 14 }}>See All</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
-      <ChaptersModal chapters={chapters} isOpen={chaptersModalOpen} setIsOpen={setChaptersModalOpen} chapterSelect={loadTracksForTitle} />
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 
@@ -155,10 +300,21 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     paddingBottom: 24,
+    paddingHorizontal: 24,
+  },
+  headerButton: {
+    backgroundColor: 'rgba(107, 114, 128, .15)',
+    backdropFilter: 'blur(10px)',
+    borderRadius: '100%',
+    width: 35,
+    height: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   metaContainer: {
     justifyContent: 'center',
     paddingTop: 25,
+    width: '100%'
     // alignItems: ''
   },
   buttonContainer: {
@@ -168,28 +324,42 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   titleText: {
-    color: PALETTE.text,
-    fontSize: 20,
+    color: PALETTE.textWhite,
+    fontSize: 26,
     textAlign: 'center',
+    fontFamily: 'Inter_700Bold',
+    marginBottom: 12
+  },
+  authorText: {
+    color: PALETTE.textOffWhite,
+    fontFamily: 'Inter_400Regular',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 12
   },
   buttonRoot: {
-    borderRadius: 24,
+    borderRadius: 10,
     paddingVertical: 8,
     paddingHorizontal: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
   playTitleButton: {
-    backgroundColor: PALETTE.primary,
+    backgroundColor: 'linear-gradient(rgba(108, 92, 231, 1), rgba(108, 92, 231, .2))',
+    paddingVertical: 12,
+    flexDirection: 'row',
+    gap: 8,
+    flex: 1,
   },
   playTitleButtonText: {
     color: PALETTE.text,
+    fontSize: 16,
   },
-  chapterListButton: {
-    backgroundColor: PALETTE.secondary,
+  downloadButton: {
+    backgroundColor: PALETTE.backgroundLight,
   },
-  chapterListButtonText: {
-    color: PALETTE.text,
+  downloadButtonText: {
+    color: PALETTE.primary,
   },
   centeredView: {
     flex: 1,
@@ -212,6 +382,57 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  aboutBookTextContainer: {
+    backgroundColor: PALETTE.backgroundLight,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 18,
+  },
+  aboutBookText: {
+    color: PALETTE.textWhite,
+    lineHeight: 22,
+    marginBottom: 12
+  },
+  bookInfoContainer: {
+    backgroundColor: PALETTE.backgroundLight,
+    padding: 16,
+    borderRadius: 10,
+    width: '100%',
+  },
+  bookInfoEntry: {
+    width: '100%',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  additionalSectionContainer: {
+    width: '100%',
+    marginBottom: 24,
+  },
+  additionalSectionHeader: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  titleSectionHeader: {
+    color: PALETTE.textWhite,
+    fontSize: 22,
+    fontFamily: 'Inter_600SemiBold'
+  },
+  chaptersFeatureChapterCount: {
+    color: PALETTE.textOffWhite,
+  },
+  chaptersContainer: {
+    backgroundColor: PALETTE.backgroundLight,
+    borderRadius: 10,
+  },
+  chapterContainer: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderColor: '#252530',
+    flexDirection: 'row',
   },
   modalHeader: {
     flexDirection: 'row',

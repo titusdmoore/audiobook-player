@@ -34,8 +34,8 @@ export default function JellyfinSettings() {
 
       // throw new Error('Breakpoint, prior to setItem' + JSON.stringify(userResponse));
       await setAppOption(db, 'jellyfinAccessToken', userResponse.accessToken);
-      await setAppOption(db, 'jellyfinUsername', userResponse.accessToken);
-      await setAppOption(db, 'jellyfinPassword', userResponse.accessToken);
+      await setAppOption(db, 'jellyfinUsername', username);
+      await setAppOption(db, 'jellyfinPassword', password);
       await setAppOption(db, 'jellyfinUserId', userResponse.user.Id);
       await setAppOption(db, 'jellyfinDomain', domain);
       dispatch(setAccessToken(userResponse.accessToken));

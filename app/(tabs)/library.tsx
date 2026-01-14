@@ -72,7 +72,7 @@ export default function Tab() {
     <SafeAreaView
       style={{
         flex: 1,
-        justifyContent: "center",
+        justifyContent: "space-between",
         alignItems: "center",
       }}
     >

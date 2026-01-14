@@ -16,6 +16,9 @@ import startup from '@/utils';
 import { authenticateUserByName, getUserById } from '@/utils/book-providers/jellyfin';
 import { PlaybackService } from '@/service';
 import { Storage } from 'expo-sqlite/kv-store';
+import * as Inter from '@expo-google-fonts/inter';
+import { TitleHeader } from './[titleId]';
+import { PlayerHeader } from './player';
 
 function AppInitializer() {
   const dispatch = useAppDispatch();
@@ -23,7 +26,13 @@ function AppInitializer() {
   const bookProvider = useAppSelector(state => state.bookProvider);
   const db = useSQLiteContext();
 
+  let [fontsloaded] = Inter.useFonts({
+    ...Inter
+  });
+
+
   useEffect(() => {
+    console.log('running this')
     TrackPlayer.registerPlaybackService(() => PlaybackService);
 
     if (!bookProvider.jellyfinAccessToken) {
@@ -65,25 +74,9 @@ function AppInitializer() {
       })().then(() => { });
     }
 
-    if (!bookProvider.dropboxInitialized && false) {
-      (async () => {
-        let tokens = await DropboxProvider.fetchStoreToken();
-
-        if (tokens.accessToken) {
-          dispatch(setDropboxTokens(tokens));
-          dispatch(setDropboxInitialized(await DropboxProvider.verifyConnection(bookProvider.dropboxAccessToken ?? '')));
-        }
-      })().then(() => { });
-    } else {
-      (async () => {
-        if (!await DropboxProvider.verifyConnection(bookProvider.dropboxAccessToken ?? '')) {
-          // dispatch(setDropboxTokens(tokens));
-          dispatch(setDropboxInitialized(false));
-        }
-      })().then(() => { });
-    }
-
+    console.log("made it to this place")
     if (!audioPlayer.playerInitialized) {
+      console.log("initializing")
       TrackPlayer.setupPlayer({
         autoHandleInterruptions: true,
       }).then(() => {
@@ -121,6 +114,7 @@ function AppInitializer() {
 }
 
 export default function RootLayout() {
+
   return (
     <ThemeProvider value={AudiobookPlayerTheme}>
       <Provider store={store}>
@@ -128,8 +122,8 @@ export default function RootLayout() {
           <AppInitializer />
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="player" options={{ presentation: 'modal', title: 'Player' }} />
-            <Stack.Screen name="[titleId]" options={{ headerShown: true }} />
+            <Stack.Screen name="player" options={{ presentation: 'modal', title: 'Player', header: (props) => <PlayerHeader {...props} /> }} />
+            <Stack.Screen name="[titleId]" options={{ header: (props) => <TitleHeader {...props} />, headerShown: true }} />
           </Stack>
         </SQLiteProvider>
       </Provider>

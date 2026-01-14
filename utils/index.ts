@@ -37,7 +37,6 @@ export type FetchItemOptions = {
 
 export async function getPlayableById(id: string, fetchOptions: FetchItemOptions, db: SQLiteDatabase): Promise<Playable | null> {
 	let title = await getDownloadedTitleById(db, id);
-	console.log('title', title)
 	if (title) {
 		return new DbPlayable(title);
 	}
@@ -53,25 +52,18 @@ export async function getPlayableById(id: string, fetchOptions: FetchItemOptions
 }
 
 export async function fetchChildrenPlayables(playable: Playable, db: SQLiteDatabase, config: FetchItemOptions): Promise<Playable[]> {
-	console.log("inside")
 	try {
 		// if (!playable.isParentPlayable()) { return []; }
 
-		console.log("is parent");
-
 		if (playable.isDownloaded()) {
-			console.log("is downloaded");
 			let dbChildrenItems = await getChaptersForTitle(db, (playable as DbPlayable).dbId().toString());
-			console.log(dbChildrenItems)
 
 			return dbChildrenItems?.map((item) => new DbPlayable(item)) ?? [];
 		}
 
 		let chaptersRes = await fetchAudiobooks(config.domain, config.accessToken, { limit: 100, startIndex: 0, parentId: playable.id });
 		if (chaptersRes && chaptersRes.ok) {
-			console.log("here")
 			let chaptersResParsed: { Items: Item[] } = await chaptersRes.json();
-			console.log("hi", chaptersResParsed)
 
 			return chaptersResParsed.Items.map((item) => new JellyPlayable(item, config));
 		}

@@ -32,43 +32,69 @@ function PlayButton({ scale }: { scale: number }) {
 	switch (playerState.state) {
 		case State.Playing:
 			return (
-				<TouchableOpacity onPress={pauseCurrentTrack}>
-					<FontAwesome6Pro name="circle-pause" size={50 * scale} color={PALETTE.primary} />
+				<TouchableOpacity onPress={pauseCurrentTrack} style={styles.playPauseButton}>
+					<FontAwesome6Pro name="pause" iconStyle="solid" size={40 * scale} color={PALETTE.textWhite} />
 				</TouchableOpacity>
 			);
 		case State.Loading:
 		case State.Buffering:
 			return (
 				<Animated.View style={{ transform: [{ rotate: spin }] }}>
-					<FontAwesome6Pro name="loader" style={{}} iconStyle="duotone" size={50 * scale} color={PALETTE.primary} />
+					<FontAwesome6Pro name="loader" style={{}} iconStyle="duotone" size={40 * scale} color={PALETTE.primary} />
 				</Animated.View>
 			)
 		case State.Error:
 			// TrackPlayer.play().then(() => { });
 			return (
 				<Animated.View style={{ transform: [{ rotate: spin }] }}>
-					<FontAwesome6Pro name="hose" style={{}} iconStyle="duotone" size={50 * scale} color={PALETTE.primary} />
+					<FontAwesome6Pro name="hose" style={{}} iconStyle="duotone" size={40 * scale} color={PALETTE.primary} />
 				</Animated.View>
 			)
 		default:
 			return (
-				<TouchableOpacity onPress={playCurrentTrack}>
-					<FontAwesome6Pro name="circle-play" size={50 * scale} color={PALETTE.primary} />
+				<TouchableOpacity onPress={playCurrentTrack} style={styles.playPauseButton}>
+					<FontAwesome6Pro name="play" iconStyle="solid" size={40 * scale} color={PALETTE.textWhite} />
 				</TouchableOpacity>
 			);
 	}
 }
 
 export default function AudioControls({ scale = 1, type = ControlsType.FULL }: { scale?: number, type?: ControlsType }) {
-
 	return (
-		<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-			<FontAwesome6Pro name="backward-step" size={30 * scale} color={PALETTE.primary} />
-			{type == ControlsType.FULL && (<FontAwesome6Pro name="backward" size={20 * scale} color={PALETTE.primary} />)}
+		<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 24 }}>
+			<TouchableOpacity style={styles.controlButton}>
+				<FontAwesome6Pro name="backward-step" size={25 * scale} color={PALETTE.textWhite} />
+			</TouchableOpacity>
+			{type == ControlsType.FULL && (
+				<TouchableOpacity style={styles.controlButton}>
+					<FontAwesome6Pro name="rotate-left" size={20 * scale} color={PALETTE.textWhite} />
+				</TouchableOpacity>
+			)}
 			<PlayButton scale={scale} />
-			{type == ControlsType.FULL && (<FontAwesome6Pro name="forward" size={20 * scale} color={PALETTE.primary} />)}
-			<FontAwesome6Pro name="forward-step" size={30 * scale} color={PALETTE.primary} />
+			{type == ControlsType.FULL && (
+				<TouchableOpacity style={styles.controlButton}>
+					<FontAwesome6Pro name="rotate-right" iconStyle="solid" size={20 * scale} color={PALETTE.textWhite} />
+				</TouchableOpacity>
+			)}
+			<TouchableOpacity style={styles.controlButton}>
+				<FontAwesome6Pro name="forward-step" size={25 * scale} color={PALETTE.textWhite} />
+			</TouchableOpacity>
 		</View>
 	);
 }
 
+
+const styles = StyleSheet.create({
+	controlButton: {
+		backgroundColor: PALETTE.backgroundLight,
+		paddingHorizontal: 10,
+		paddingVertical: 18,
+		borderRadius: 22
+	},
+	playPauseButton: {
+		backgroundColor: 'linear-gradient(rgba(108, 92, 231, 1), rgba(108, 92, 231, .2))',
+		paddingHorizontal: 10,
+		paddingVertical: 24,
+		borderRadius: 32
+	},
+});

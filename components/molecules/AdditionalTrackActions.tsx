@@ -11,6 +11,7 @@ import { getAppOption, setAppOption } from "@/utils/db/db";
 import moment from "moment";
 import { useAppDispatch } from "@/utils/hooks";
 import { setSleepTimer as setStoreSleepTimer } from "@/utils/slices/book-provider-slice";
+import AdditionalControlsButton from "../atoms/AdditionalControlsButton";
 // import { useTrackPlayerEvents, Event, State } from "react-native-track-player";
 
 
@@ -58,13 +59,24 @@ export default function AdditionalTrackActions() {
 
 	return (
 		<View style={styles.additionalControlsContainer}>
-			<TouchableOpacity onPress={() => setPlaybackRateModalIsOpen(!playbackRateModalIsOpen)}>
-				<Text style={styles.playbackRateSpeedText}>{playbackRate.toFixed(2).toString()}x</Text>
-				<Text style={styles.playbackRateSpeedHelperText}>Speed</Text>
-			</TouchableOpacity>
-			<TouchableOpacity onPress={() => setSleepTimerModalOpen(!sleepTimerModalOpen)}>
-				<FontAwesome6Pro name="alarm-snooze" size={30} color={PALETTE.text} />
-			</TouchableOpacity>
+			<AdditionalControlsButton
+				icon='gauge-high'
+				name='Speed'
+				valueText={playbackRate.toFixed(2).toString() + 'x'}
+				onPress={() => setPlaybackRateModalIsOpen(!playbackRateModalIsOpen)}
+			/>
+			<AdditionalControlsButton
+				icon='moon'
+				name='Timer'
+				valueText='Off'
+				onPress={() => setSleepTimerModalOpen(!sleepTimerModalOpen)}
+			/>
+			<AdditionalControlsButton
+				icon='bookmark'
+				name='Bookmark'
+				valueText='Save'
+				onPress={() => { }}
+			/>
 			<PlaybackRateControlsModal
 				playbackRate={playbackRate}
 				setPlaybackRate={setPlaybackRate}
