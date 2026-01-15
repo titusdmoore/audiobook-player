@@ -20,25 +20,9 @@ export default function HeaderBar({ layout, options, route, navigation }: Bottom
 	}
 
 	return (
-		<View style={{ paddingTop: insets.top, height: 60 + insets.top, backgroundColor: PALETTE.backgroundDark }}>
+		<View style={{ paddingTop: insets.top, height: 60 + insets.top }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: '100%', paddingHorizontal: 24 }}>
-				<Text style={{ color: PALETTE.text, fontSize: 20, fontWeight: '600' }}>{options.title == 'Home' ? 'ABP' : options.title}</Text>
-				<TextInput
-					style={!searchIsOpen ? { display: 'none' } : { color: PALETTE.text }}
-					placeholder="Search for Title"
-					ref={inputRef}
-					value={searchTerm}
-					onSubmitEditing={handleSubmission}
-					onChangeText={setSearchTerm}
-				/>
-				<TouchableOpacity style={searchIsOpen ? { display: 'none' } : {}} onPress={() => {
-					setSearchIsOpen(!searchIsOpen);
-					setTimeout(() => {
-						(inputRef.current as any).focus();
-					}, 100)
-				}}>
-					<FontAwesome6Pro name="magnifying-glass" color={PALETTE.text} size={20} />
-				</TouchableOpacity>
+				<Text style={{ color: PALETTE.textWhite, fontSize: 20, fontWeight: '600' }}>{options.title == 'Home' ? 'ABP' : options.title}</Text>
 			</View>
 		</View>
 	);

@@ -54,7 +54,8 @@ export class JellyPlayable extends Playable {
 	}
 
 	getArtist(): string {
-		return '';
+		console.log('artist', this.#jellyItem)
+		return this.#jellyItem.AlbumArtist;
 	}
 
 	getParentId(): string | null {

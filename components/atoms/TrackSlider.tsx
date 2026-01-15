@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, useWindowDimensions } from "react-native";
 import Slider from '@react-native-community/slider';
 import { useActiveTrack, useProgress } from "react-native-track-player";
 import { useEffect } from "react";
@@ -8,12 +8,13 @@ import { formatAudioProgressTime, seekToTrackPosition } from "@/utils/audio-play
 export default function TrackSlider() {
 	const progress = useProgress();
 	const activeTrack = useActiveTrack();
+	const { height, width } = useWindowDimensions();
 
 	return (
 		<View style={{ flexDirection: 'row', alignItems: 'center' }}>
 			<Text style={{ color: PALETTE.text }}>{formatAudioProgressTime(progress.position)}</Text>
 			<Slider
-				style={{ width: 300, height: 50 }}
+				style={{ width: width * .70, height: 50, margin: 'auto' }}
 				minimumValue={0}
 				value={progress.position}
 				maximumValue={progress.duration}

@@ -1,7 +1,7 @@
 import PlaybackControls from "@/components/molecules/PlaybackControls";
 import { useEffect, useState } from "react";
 import { Directory, Paths, File } from "expo-file-system";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppSelector } from "@/utils/hooks";
 import TrackPlayer, { PitchAlgorithm, State, Track, TrackType, useActiveTrack } from "react-native-track-player";
@@ -15,7 +15,10 @@ import { useSQLiteContext } from "expo-sqlite";
 import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 import { getPlayableById } from "@/utils";
 
-export function TitleImage({ sleepTimer, activeTitle }: { sleepTimer: number | null, activeTitle?: Playable }) {
+export function TitleImage({ sleepTimer, activeTitle }: { sleepTimer: number | null, activeTitle: Playable | null }) {
+  const { height, width } = useWindowDimensions();
+  console.log(activeTitle)
+
   if (sleepTimer !== null) {
     console.log('sleep timer', sleepTimer)
     return (
@@ -30,7 +33,7 @@ export function TitleImage({ sleepTimer, activeTitle }: { sleepTimer: number | n
 
   return (
     <>
-      {activeTitle && (<Image source={activeTitle.imagePath} style={styles.image} />)}
+      {activeTitle && (<Image source={activeTitle.imagePath} style={[styles.image, { width: width * .65, height: width * .65 }]} />)}
     </>
   );
 }
@@ -102,16 +105,19 @@ export default function Modal() {
   };
 
   useEffect(() => {
+    handleSleepTimerDisplay();
+  }, [jellyfinProvider.sleepTimer]);
+
+  useEffect(() => {
     (async () => {
+      console.log(activeTrack)
       let titlePlayableRes = await getPlayableById(activeTrack?.parentItemId as string, jellyConfig, db)
       setTitlePlayable(titlePlayableRes);
 
       let chapterPlayableRes = await getPlayableById(activeTrack?.id, jellyConfig, db)
       setChapterPlayable(chapterPlayableRes);
     })().then(() => { });
-
-    handleSleepTimerDisplay();
-  }, [jellyfinProvider.sleepTimer]);
+  }, [activeTrack]);
 
   useEffect(() => {
     if (!remainingSleepTimer) {
@@ -122,7 +128,7 @@ export default function Modal() {
   return (
     <View style={styles.rootContainer}>
       {remainingSleepTimer && (<Text style={{ color: PALETTE.text }}>{formatAudioProgressTime(remainingSleepTimer)}</Text>)}
-      <TitleImage sleepTimer={remainingSleepTimer} activeTitle={audioPlayer.activeTitle as any} />
+      <TitleImage sleepTimer={remainingSleepTimer} activeTitle={titlePlayable} />
       <View style={styles.metaContainer}>
         <Text style={styles.title}>{titlePlayable?.name}</Text>
         {/* TODO: Remove Eric */}
@@ -169,8 +175,6 @@ const styles = StyleSheet.create({
     paddingVertical: 20
   },
   image: {
-    width: 335,
-    height: 335,
     borderRadius: 20,
     marginBottom: 12,
     marginHorizontal: 'auto',

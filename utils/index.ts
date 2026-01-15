@@ -44,7 +44,7 @@ export async function getPlayableById(id: string, fetchOptions: FetchItemOptions
 	let jellyTitleRes = await fetchItem(fetchOptions.domain, fetchOptions.accessToken, fetchOptions.userId, id);
 	if (jellyTitleRes.ok) {
 		let res = await jellyTitleRes.json();
-		console.log(res)
+
 		return new JellyPlayable(res, fetchOptions);
 	}
 
@@ -65,7 +65,7 @@ export async function fetchChildrenPlayables(playable: Playable, db: SQLiteDatab
 		if (chaptersRes && chaptersRes.ok) {
 			let chaptersResParsed: { Items: Item[] } = await chaptersRes.json();
 
-			return chaptersResParsed.Items.map((item) => new JellyPlayable(item, config));
+			return chaptersResParsed.Items.map((item) => new JellyPlayable({ ...item, ParentId: playable.id }, config));
 		}
 
 		return [];

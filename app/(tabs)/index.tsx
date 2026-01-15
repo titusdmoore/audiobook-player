@@ -4,7 +4,7 @@ import TrackPlayer, { PitchAlgorithm, State, Track } from "react-native-track-pl
 import { Directory, Paths, File } from "expo-file-system";
 import PlaybackControls from "@/components/molecules/PlaybackControls";
 import { Link, useNavigation, usePathname } from "expo-router";
-import { PALETTE } from "@/utils/colors";
+import { PALETTE, PALETTE_OLD } from "@/utils/colors";
 import * as SecureStore from 'expo-secure-store';
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import { getBooks, getDownloadedTitles } from "@/utils/db/db";
@@ -17,6 +17,10 @@ import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 import { JellyPlayable } from "@/utils/classes/jelly-playable";
 import { DbPlayable } from "@/utils/classes/db-playable";
 import { ItemDb } from "@/utils/db/schema";
+import { LinearGradient } from 'expo-linear-gradient';
+import { Image } from "expo-image";
+import ProgressBar from "@/components/molecules/ProgresBar";
+import { PlayButton } from "@/components/atoms/AudioControls";
 
 // source = { require('@/assets/images/react-logo.png') }
 export default function Tab() {
@@ -35,6 +39,7 @@ export default function Tab() {
     (async () => {
       let inProgressIdsDb = await db.getAllAsync('SELECT title_id FROM jellyfin_book_progress LIMIT 10;');
       let downloadedBooks = await getDownloadedTitles(db);
+      console.log("here", downloadedBooks)
       setDownloadedBooks((downloadedBooks as ItemDb[]).map((book: ItemDb) => new DbPlayable(book)));
       let config = {
         domain: jellyfinProvider.jellyfinDomain ?? '',
@@ -76,44 +81,91 @@ export default function Tab() {
   }, [navigation])
 
   return (
-    <SafeAreaView style={styles.sectionContainer}>
-      <ScrollView>
-        <View style={styles.sectionTitleContainer}>
-          <TouchableOpacity style={styles.sectionTitleLink}>
-            <Text style={styles.sectionTitle}>Books In Progress</Text>
-            <FontAwesome6Pro name="angle-right" size={20} color={PALETTE.text} />
-          </TouchableOpacity>
+    <SafeAreaView style={{}}>
+      <ScrollView contentContainerStyle={styles.sectionContainer}>
+        <View style={{ marginBottom: 24 }}>
+          <View style={styles.sectionTitleContainer}>
+            <Text style={styles.sectionTitle}>Continue Listening</Text>
+            <TouchableOpacity>
+              <Text style={styles.sectionSeeAllText}>See All</Text>
+            </TouchableOpacity>
+          </View>
+          <LinearGradient
+            colors={['rgba(108, 92, 231, 1)', '#A29BFE']}
+            end={{ x: 1, y: 1 }}
+            style={styles.lastPlayedContainer}
+          >
+            <View style={styles.lastPlayedMetaContainer}>
+              <Image source={downloadedBooks[0]?.imagePath} style={styles.lastPlayedTitleImage} />
+              <View style={{ flex: 1, paddingHorizontal: 12, justifyContent: 'center' }}>
+                <Text style={styles.lastPlayedTitle}>{downloadedBooks[0]?.name}</Text>
+                <Text style={styles.lastPlayedTitleAuthor}>{downloadedBooks[0]?.getArtist() || 'Eric Metaxas'}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 }}>
+                  <ProgressBar value={.42} baseColor="rgba(255, 255, 255, .25)" progressColor={PALETTE.textWhite} rounded={true} />
+                  <Text style={{ color: PALETTE.textWhite, fontFamily: 'Inter_400Regular', flex: 1 }}>42%</Text>
+                </View>
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', paddingTop: 24, paddingBottom: 6, alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text style={{ color: PALETTE.textWhite, fontFamily: 'Inter_400Regular' }}>2h 14m Left</Text>
+              <View style={styles.compactAudioControlsPlay}>
+                <Link href={{
+                  pathname: '/[titleId]',
+                  params: { titleId: downloadedBooks[0]?.id }
+                }}>
+                  <FontAwesome6Pro name="play" iconStyle="solid" size={20} color={PALETTE.primary} />
+                </Link>
+              </View>
+            </View>
+          </LinearGradient>
+        </View>
+        <View>
+          <View style={styles.sectionTitleContainer}>
+            <TouchableOpacity style={styles.sectionTitleLink}>
+              <Text style={styles.sectionTitle}>Books Progress</Text>
+            </TouchableOpacity>
+          </View>
           <FlatList horizontal={true} data={inProgressBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
         </View>
-        <View style={styles.sectionTitleContainer}>
-          <TouchableOpacity style={styles.sectionTitleLink}>
-            <Text style={styles.sectionTitle}>Recently Added Titles</Text>
-            <FontAwesome6Pro name="angle-right" size={20} color={PALETTE.text} />
-          </TouchableOpacity>
+
+        <View>
+          <View style={styles.sectionTitleContainer}>
+            <TouchableOpacity style={styles.sectionTitleLink}>
+              <Text style={styles.sectionTitle}>New Releases</Text>
+              <FontAwesome6Pro name="angle-right" size={20} color={PALETTE.text} />
+            </TouchableOpacity>
+          </View>
           <FlatList horizontal={true} data={recentBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
         </View>
-        <View style={styles.sectionTitleContainer}>
-          <TouchableOpacity style={styles.sectionTitleLink}>
-            <Text style={styles.sectionTitle}>Downloaded Titles</Text>
-            <FontAwesome6Pro name="angle-right" size={20} color={PALETTE.text} />
-          </TouchableOpacity>
+        <View>
+          <View style={styles.sectionTitleContainer}>
+            <TouchableOpacity style={styles.sectionTitleLink}>
+              <Text style={styles.sectionTitle}>Downloaded Titles</Text>
+              <FontAwesome6Pro name="angle-right" size={20} color={PALETTE.text} />
+            </TouchableOpacity>
+          </View>
           <FlatList horizontal={true} data={downloadedBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 }
 
 const styles = StyleSheet.create({
   sectionContainer: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 24,
   },
   sectionTitleContainer: {
-    marginBottom: 24
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
   },
   sectionTitle: {
-    color: PALETTE.text,
+    color: PALETTE.textWhite,
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 20,
+    flex: 1,
   },
   sectionTitleLink: {
     flexDirection: 'row',
@@ -122,4 +174,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
+  sectionSeeAllText: {
+    color: PALETTE.primary,
+    fontFamily: 'Inter_400Regular',
+  },
+  lastPlayedContainer: {
+    borderRadius: 10,
+    padding: 12
+  },
+  lastPlayedTitle: {
+    color: PALETTE.textWhite,
+    fontSize: 16,
+    fontFamily: 'Inter_500Medium',
+  },
+  lastPlayedTitleAuthor: {
+    color: PALETTE.textOffWhite,
+    fontFamily: 'Inter_400Regular',
+  },
+  lastPlayedTitleImage: {
+    width: 75,
+    height: 75,
+    borderRadius: 10
+  },
+  lastPlayedMetaContainer: {
+    flexDirection: 'row',
+  },
+  compactAudioControlsPlay: {
+    width: 50,
+    height: 50,
+    borderRadius: "100%",
+    backgroundColor: PALETTE.textWhite,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });

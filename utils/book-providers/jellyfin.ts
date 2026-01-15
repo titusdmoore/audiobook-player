@@ -264,4 +264,5 @@ export type Item = {
 	MediaType: any;
 	LockedFields: any;
 	LockData: any;
+	AlbumArtist: string;
 }

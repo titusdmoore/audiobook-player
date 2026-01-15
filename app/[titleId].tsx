@@ -1,14 +1,14 @@
 import { downloadTitle, fetchAudiobooks, fetchItem } from "@/utils/book-providers/jellyfin";
 import { PALETTE } from "@/utils/colors";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { Fragment, useEffect, useLayoutEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, ScrollView } from "react-native";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, ScrollView, Animated } from "react-native";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import { Button } from "@react-navigation/elements";
 import TrackPlayer, { PitchAlgorithm, Track } from "react-native-track-player";
 import { useLoadedAuthRequest } from "expo-auth-session";
 import { setActiveTitle } from "@/utils/slices/audio-player-slice";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { /* callableWithDb, */ fetchPlayerDuration, setAppOption } from "@/utils/db/db";
 import { useSQLiteContext } from "expo-sqlite";
 import { formatAudioProgressTime } from "@/utils/audio-player";
@@ -49,8 +49,10 @@ function ChaptersModal({ chapters, isOpen, setIsOpen, chapterSelect }: { chapter
 }
 
 export function TitleHeader({ navigation, route, options, back }: any) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaView style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 24, justifyContent: 'space-between' }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'transparent', paddingTop: insets.top + 6, paddingBottom: 6, paddingHorizontal: 24, justifyContent: 'space-between' }}>
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
         <FontAwesome6Pro name="arrow-left" iconStyle="solid" size={16} color={PALETTE.textWhite} />
       </TouchableOpacity>
@@ -62,7 +64,7 @@ export function TitleHeader({ navigation, route, options, back }: any) {
           <FontAwesome6Pro name="heart" size={16} color={PALETTE.textWhite} />
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -74,6 +76,21 @@ export default function TitleView() {
   const dispatch = useAppDispatch();
   const db = useSQLiteContext();
   const navigation = useNavigation();
+
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
+  const rotateAnimValue = useRef(new Animated.Value(0)).current;
+  Animated.loop(
+    Animated.timing(rotateAnimValue, {
+      toValue: 1,
+      duration: 400,
+      useNativeDriver: true
+    })
+  ).start();
+
+  const spin = rotateAnimValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg']
+  });
 
   const [playable, setPlayable] = useState<Playable | null>(null);
   const router = useRouter();
@@ -92,10 +109,12 @@ export default function TitleView() {
   };
 
   const handleDowloadTitleClick = async () => {
-    downloadTitle(db, jellyfinProvider.jellyfinDomain ?? '', jellyfinProvider.jellyfinAccessToken ?? '', jellyfinProvider.jellyfinUser?.Id, titleId as string)
+    setIsDownloading(true);
+    await downloadTitle(db, jellyfinProvider.jellyfinDomain ?? '', jellyfinProvider.jellyfinAccessToken ?? '', jellyfinProvider.jellyfinUser?.Id, titleId as string)
 
     let playableRes = await getPlayableById(titleId as string, jellyConfig, db)
     setPlayable(playableRes);
+    setIsDownloading(false);
     // when completed, update db download thingy
   };
 
@@ -183,13 +202,20 @@ export default function TitleView() {
               <FontAwesome6Pro name="play" iconStyle="solid" size={15} color={PALETTE.text} />
               <Text style={styles.playTitleButtonText}>Play Now</Text>
             </TouchableOpacity>
-            {playable?.isDownloaded() || true ? (
-              <TouchableOpacity style={[styles.buttonRoot, styles.downloadButton]} onPress={handleDowloadTitleClick}>
+            {playable?.isDownloaded() && !isDownloading ? (
+              <TouchableOpacity style={[styles.buttonRoot, styles.downloadButton]} onPress={() => { }}>
                 <FontAwesome6Pro name="file-slash" iconStyle="solid" size={15} color={PALETTE.primary} />
               </TouchableOpacity>
             ) : (
               <TouchableOpacity style={[styles.buttonRoot, styles.downloadButton]} onPress={handleDowloadTitleClick}>
                 <FontAwesome6Pro name="download" iconStyle="duotone" size={15} color={PALETTE.primary} />
+              </TouchableOpacity>
+            )}
+            {isDownloading && (
+              <TouchableOpacity style={[styles.buttonRoot, styles.downloadButton]} onPress={() => { }}>
+                <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                  <FontAwesome6Pro name="loader" style={{}} iconStyle="duotone" size={15} color={PALETTE.primary} />
+                </Animated.View>
               </TouchableOpacity>
             )}
           </View>
@@ -234,7 +260,7 @@ export default function TitleView() {
           <View style={styles.bookInfoContainer}>
             {bookInformation.map((item, index) => (
               <Fragment key={index}>
-                <View style={styles.bookInfoEntry}>
+                <View style={styles.bookInfoEntry} key={index}>
                   <View style={{ backgroundColor: 'rgba(108, 92, 231, .2)', width: 40, height: 40, borderRadius: '100%', alignItems: 'center', justifyContent: 'center' }}>
                     <FontAwesome6Pro name={item.icon as any} iconStyle="solid" size={20} color={PALETTE.primary} />
                   </View>

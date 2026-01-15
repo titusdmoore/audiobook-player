@@ -6,7 +6,7 @@ import AdditionalTrackActions from "./AdditionalTrackActions";
 
 export default function PlaybackControls() {
 	return (
-		<View>
+		<View style={{ maxWidth: '100%', backgroundColor: 'blue' }}>
 			<TrackSlider />
 			<AudioControls />
 			<AdditionalTrackActions />

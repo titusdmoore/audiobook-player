@@ -1,4 +1,4 @@
-import { Animated, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Animated, StyleSheet, TouchableOpacity, View, ViewStyle } from "react-native";
 import { FontAwesome6Pro } from "@react-native-vector-icons/fontawesome6-pro";
 import { pauseCurrentTrack, playCurrentTrack } from "@/utils/audio-player";
 import TrackPlayer, { Event, State, useIsPlaying, usePlaybackState } from "react-native-track-player";
@@ -10,7 +10,7 @@ export enum ControlsType {
 	SMALL,
 }
 
-function PlayButton({ scale }: { scale: number }) {
+export function PlayButton({ scale, style }: { scale: number, style?: ViewStyle }) {
 	const playerState = usePlaybackState();
 	const rotateAnimValue = useRef(new Animated.Value(0)).current;
 	const LoadingIcon = Animated.createAnimatedComponent(() => (<FontAwesome6Pro name="loader" style={{}} iconStyle="duotone" size={50 * scale} color={PALETTE.primary} />))
@@ -32,7 +32,7 @@ function PlayButton({ scale }: { scale: number }) {
 	switch (playerState.state) {
 		case State.Playing:
 			return (
-				<TouchableOpacity onPress={pauseCurrentTrack} style={styles.playPauseButton}>
+				<TouchableOpacity onPress={pauseCurrentTrack} style={style || styles.playPauseButton}>
 					<FontAwesome6Pro name="pause" iconStyle="solid" size={40 * scale} color={PALETTE.textWhite} />
 				</TouchableOpacity>
 			);
@@ -52,7 +52,7 @@ function PlayButton({ scale }: { scale: number }) {
 			)
 		default:
 			return (
-				<TouchableOpacity onPress={playCurrentTrack} style={styles.playPauseButton}>
+				<TouchableOpacity onPress={playCurrentTrack} style={style || styles.playPauseButton}>
 					<FontAwesome6Pro name="play" iconStyle="solid" size={40 * scale} color={PALETTE.textWhite} />
 				</TouchableOpacity>
 			);
