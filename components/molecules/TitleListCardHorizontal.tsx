@@ -6,7 +6,6 @@ import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 
 export default function TitleListCardHorizontal({ index, item }: { index: number, item: Playable }) {
-	console.log(index, item.name)
 	return (
 		<View style={styles.container} key={index}>
 			<Link href={{

@@ -27,8 +27,6 @@ export default function ListTitleCard({ index, item }: any) {
 export function ListTitleCardJelly({ index, item, horizontal }: { index: number, item: Playable, horizontal: boolean }) {
 	const jellyfinProvider = useAppSelector(state => state.bookProvider);
 
-	console.log("jelly card item", item.imagePath)
-
 	return (
 		<View style={horizontal ? styles.horizontalContainer : styles.verticalContainer} key={index}>
 			<Link href={{

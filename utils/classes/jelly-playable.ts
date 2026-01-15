@@ -54,7 +54,6 @@ export class JellyPlayable extends Playable {
 	}
 
 	getArtist(): string {
-		console.log('artist', this.#jellyItem)
 		return this.#jellyItem.AlbumArtist;
 	}
 

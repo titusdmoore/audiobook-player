@@ -39,7 +39,7 @@ export default function Tab() {
     (async () => {
       let inProgressIdsDb = await db.getAllAsync('SELECT title_id FROM jellyfin_book_progress LIMIT 10;');
       let downloadedBooks = await getDownloadedTitles(db);
-      console.log("here", downloadedBooks)
+
       setDownloadedBooks((downloadedBooks as ItemDb[]).map((book: ItemDb) => new DbPlayable(book)));
       let config = {
         domain: jellyfinProvider.jellyfinDomain ?? '',
@@ -78,8 +78,7 @@ export default function Tab() {
         }
       }
     })().then(() => { });
-  }, [navigation])
-
+  }, [navigation, jellyfinProvider.jellyfinDomain, jellyfinProvider.jellyfinAccessToken])
   return (
     <SafeAreaView style={{}}>
       <ScrollView contentContainerStyle={styles.sectionContainer}>

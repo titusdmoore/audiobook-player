@@ -12,6 +12,28 @@ export type AuthenticateUserByNameResponse = {
 	errors?: { message: string };
 };
 
+export async function verifyApiKey(domain: string, accessToken: string): Promise<boolean> {
+	let systemResponse = await fetch(`${domain}/System/Info`, {
+		headers: new Headers({
+			'accept': 'application/json',
+			'Authorization': `MediaBrowser Token="${accessToken}"`
+		})
+	});
+
+	return systemResponse.ok;
+}
+
+export async function fetchUser(domain: string, accessToken: string) {
+	let userResponse = await fetch(`${domain}/Users/Me`, {
+		headers: new Headers({
+			'accept': 'application/json',
+			'Authorization': `MediaBrowser Token="${accessToken}"`
+		})
+	});
+
+	return userResponse;
+}
+
 export async function authenticateUserByName(domain: string, username: string, password: string) {
 	try {
 		let authResponse = await fetch(`${domain}/Users/AuthenticateByName`, {

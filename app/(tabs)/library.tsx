@@ -57,6 +57,7 @@ export default function Tab() {
     if (booksResponse && booksResponse.ok) {
       let additionalBooks = await booksResponse.json();
       let newPlayables: Playable[] = await Promise.all(additionalBooks.Items.map(async (item: Item) => await getPlayableById(item.Id, jellyConfig, db)));
+      newPlayables = newPlayables.filter((item) => item);
 
       let joinedPlayables = booksJelly.concat(newPlayables);
       setBooksJelly(joinedPlayables);
@@ -72,6 +73,7 @@ export default function Tab() {
         let parsedResponse = await booksResponse.json();
 
         let playables: Playable[] = await Promise.all(parsedResponse.Items.map(async (item: Item) => await getPlayableById(item.Id, jellyConfig, db)));
+        playables = playables.filter((item) => item);
 
         setBooksJelly(playables);
       } else if (booksResponse && booksResponse.status == 401) {

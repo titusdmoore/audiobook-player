@@ -10,10 +10,10 @@ import { setAccessToken, setDropboxInitialized, setDropboxTokens, setJellyfinDom
 import { DropboxProvider } from '@/utils/book-providers/dropbox';
 import { setInitialized } from '@/utils/slices/audio-player-slice';
 import { SQLiteProvider, useSQLiteContext } from 'expo-sqlite';
-import { getAppOption, migrateDbIfNeeded } from '@/utils/db/db';
+import { getAppOption, migrateDbIfNeeded, setAppOption } from '@/utils/db/db';
 import { Text, TouchableOpacity, View } from 'react-native';
 import startup from '@/utils';
-import { authenticateUserByName, getUserById } from '@/utils/book-providers/jellyfin';
+import { authenticateUserByName, fetchUser, getUserById, verifyApiKey } from '@/utils/book-providers/jellyfin';
 import { PlaybackService } from '@/service';
 import { Storage } from 'expo-sqlite/kv-store';
 import * as Inter from '@expo-google-fonts/inter';
@@ -32,51 +32,40 @@ function AppInitializer() {
 
 
   useEffect(() => {
-    console.log('running this')
     TrackPlayer.registerPlaybackService(() => PlaybackService);
+    (async () => {
+      let domain = (await getAppOption(db, 'jellyfinDomain'))?.option_value ?? '';
+      let username = (await getAppOption(db, 'jellyfinUsername'))?.option_value ?? '';
+      let password = (await getAppOption(db, 'jellyfinPassword'))?.option_value ?? '';
+      let accessToken = (await getAppOption(db, 'jellyfinAccessToken'))?.option_value ?? '';
 
-    if (!bookProvider.jellyfinAccessToken) {
-      (async () => {
-        let accessToken = await Storage.getItem('jellyfinAccessToken');
-        let userId = await Storage.getItem('jellyfinUserId');
-        let domain = await Storage.getItem('jellyfinDomain');
+      if (!bookProvider.jellyfinDomain) {
+        dispatch(setJellyfinDomain(domain));
+        dispatch(setAccessToken(accessToken));
+        dispatch(setAccessToken(accessToken));
+      }
 
-        if (accessToken && domain) {
-          dispatch(setAccessToken(accessToken));
-          dispatch(setJellyfinDomain(domain));
+      if (domain && username && password && accessToken) {
+        if (!await verifyApiKey(domain, accessToken)) {
+          let userResponse = await authenticateUserByName(domain, username, password);
 
-          if (userId) {
-            let userRes = await getUserById(domain, userId, accessToken);
-            console.log(userRes)
+          await setAppOption(db, 'jellyfinAccessToken', userResponse.accessToken);
+          await setAppOption(db, 'jellyfinDomain', domain);
+          dispatch(setAccessToken(userResponse.accessToken));
+          dispatch(setJellyfinUser(userResponse.user));
+        } else {
+          let userResponse = await fetchUser(domain, accessToken);
 
-            if (userRes.ok) {
-              dispatch(setJellyfinUser(await userRes.json()));
-            } else {
-              let userResponse = await authenticateUserByName(
-                (await getAppOption(db, 'jellyfinDomain'))?.option_value ?? '',
-                (await getAppOption(db, 'jellyfinUsername'))?.option_value ?? '',
-                (await getAppOption(db, 'jellyfinPassword'))?.option_value ?? ''
-              );
+          if (userResponse.ok) {
+            let userData = await userResponse.json();
 
-              if (userResponse.errors) {
-                console.log(userResponse.errors)
-                await Storage.setItem('jellyfinAccessToken', '');
-                return;
-              }
-
-              await Storage.setItem('jellyfinAccessToken', userResponse.accessToken);
-              dispatch(setAccessToken(userResponse.accessToken));
-              dispatch(setJellyfinUser(userResponse.user));
-            }
+            dispatch(setJellyfinUser(userData));
           }
-
         }
-      })().then(() => { });
-    }
+      }
+    })().then(() => { });
 
-    console.log("made it to this place")
     if (!audioPlayer.playerInitialized) {
-      console.log("initializing")
       TrackPlayer.setupPlayer({
         autoHandleInterruptions: true,
       }).then(() => {
@@ -114,7 +103,6 @@ function AppInitializer() {
 }
 
 export default function RootLayout() {
-
   return (
     <ThemeProvider value={AudiobookPlayerTheme}>
       <Provider store={store}>

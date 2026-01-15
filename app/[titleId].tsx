@@ -287,7 +287,7 @@ export default function TitleView() {
                 </View>
                 <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 12, alignItems: 'center' }}>
                   <View style={{ maxWidth: '75%' }}>
-                    <Text style={{ fontFamily: 'Inter_400Regular', color: PALETTE.textWhite, fontSize: 14, wordWrap: 'break-word' }}>{chapter.name}</Text>
+                    <Text style={{ fontFamily: 'Inter_400Regular', color: PALETTE.textWhite, fontSize: 14, wordWrap: 'break-word' }} numberOfLines={2}>{chapter.name}</Text>
                     <Text style={{ fontFamily: 'Inter_300Light', color: PALETTE.textOffWhite, }}>{formatAudioProgressTime(chapter.getDuration())}</Text>
                   </View>
                   <TouchableOpacity>
