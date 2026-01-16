@@ -14,6 +14,7 @@ type SleepTimerControlsModalProps = {
 export default function SleepTimerControlsModal({ isOpen, setIsOpen, sleepTimer, setSleepTimer }: SleepTimerControlsModalProps) {
 	const [customAmountMinutes, setCustomAmountMinutes] = useState<number>(0);
 	const [customAmountHours, setCustomAmountHours] = useState<number>(0);
+	const [customAmount, setCustomAmount] = useState<string>('0');
 
 	const handleSetCustomAmount = () => {
 		handleTimerSet((customAmountHours * 60) + customAmountMinutes);
@@ -44,40 +45,56 @@ export default function SleepTimerControlsModal({ isOpen, setIsOpen, sleepTimer,
 			<View style={styles.centeredView}>
 				<View style={styles.modalView}>
 					<View style={styles.headerContainer}>
-						<Text style={styles.headerText}>Sleep Timer</Text>
+						<View>
+							<Text style={styles.headerText}>Sleep Timer</Text>
+							<Text style={{}}>Auto-pause after duration</Text>
+						</View>
 						<TouchableOpacity style={{ padding: 4 }} onPress={() => setIsOpen(!isOpen)}>
 							<FontAwesome6Pro name='x' size={16} color={PALETTE.text} />
 						</TouchableOpacity>
 					</View>
-					<View style={styles.customAmountContainer}>
-						<Text style={styles.customAmountHelperText}>Custom Amount:</Text>
-						<View style={styles.customAmountInputContainer}>
-							<View style={styles.inputContainer}>
-								<TextInput
-									style={styles.input}
-									placeholder="Timer"
-									keyboardType="numeric"
-									value={customAmountHours.toString()}
-									onChangeText={(text) => handleNumericChange(text, customAmountHours, setCustomAmountHours)}
-								/>
-								<Text style={styles.inputHelperText}>Hours</Text>
-							</View>
-							<View style={styles.inputContainer}>
-								<TextInput
-									style={styles.input}
-									placeholder="Timer"
-									keyboardType="numeric"
-									value={customAmountMinutes.toString()}
-									onChangeText={(text) => handleNumericChange(text, customAmountMinutes, setCustomAmountMinutes)}
-								/>
-								<Text style={styles.inputHelperText}>Minutes</Text>
-							</View>
-						</View>
-						<TouchableOpacity onPress={handleSetCustomAmount} style={styles.customAmountSetButton}>
-							<Text style={styles.customAmountButtonText}>Set Amount</Text>
+					<View style={styles.defaultTimeSetButtonContainer}>
+						<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(5)}>
+							<FontAwesome6Pro name='clock' iconStyle="solid" size={16} color={PALETTE.primary} />
+							<Text style={styles.timeSetButton}>5m</Text>
+						</TouchableOpacity>
+						<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(10)}>
+							<FontAwesome6Pro name='clock' iconStyle="solid" size={16} color={PALETTE.primary} />
+							<Text style={styles.timeSetButton}>10m</Text>
+						</TouchableOpacity>
+						<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(15)}>
+							<FontAwesome6Pro name='clock' iconStyle="solid" size={16} color={PALETTE.primary} />
+							<Text style={styles.timeSetButton}>15m</Text>
+						</TouchableOpacity>
+						<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(30)}>
+							<FontAwesome6Pro name='clock' iconStyle="solid" size={16} color={PALETTE.primary} />
+							<Text style={styles.timeSetButton}>30m</Text>
+						</TouchableOpacity>
+						<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(45)}>
+							<FontAwesome6Pro name='clock' iconStyle="solid" size={16} color={PALETTE.primary} />
+							<Text style={styles.timeSetButton}>45m</Text>
+						</TouchableOpacity>
+						<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(60)}>
+							<FontAwesome6Pro name='clock' iconStyle="solid" size={16} color={PALETTE.primary} />
+							<Text style={styles.timeSetButton}>1h</Text>
+						</TouchableOpacity>
+						<TouchableOpacity style={[styles.defaultTimeSetButton, styles.chapterTimeSetButton]} onPress={() => handleTimerSet(15)}>
+							<FontAwesome6Pro name='clock' iconStyle="solid" size={16} color={PALETTE.primary} />
+							<Text style={styles.timeSetButton}>End of chapter</Text>
 						</TouchableOpacity>
 					</View>
-					<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(5)}>
+					<View style={styles.customAmountContainer}>
+						<View style={styles.customAmountHeader}>
+							<Text style={styles.customAmountHeaderText}>Custom time (minutes)</Text>
+							<TextInput keyboardType="number-pad" style={styles.customAmountInput} selectTextOnFocus={true} value={customAmount} onChangeText={setCustomAmount} />
+						</View>
+						<View>
+							<TouchableOpacity style={styles.customAmountSetButton}>
+								<Text style={styles.customAmountButtonText}>Set</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+					{ /*<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(5)}>
 						<Text style={styles.timeSetButton}>5 Minutes</Text>
 					</TouchableOpacity>
 					<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(10)}>
@@ -88,9 +105,9 @@ export default function SleepTimerControlsModal({ isOpen, setIsOpen, sleepTimer,
 					</TouchableOpacity>
 					<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(60)}>
 						<Text style={styles.timeSetButton}>1 Hour</Text>
-					</TouchableOpacity>
-					<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(null)}>
-						<Text style={styles.timeSetButton}>Clear Timer</Text>
+					</TouchableOpacity> */}
+					<TouchableOpacity style={styles.cancelButton} onPress={() => handleTimerSet(null)}>
+						<Text style={styles.timeSetButton}>Cancel Timer</Text>
 					</TouchableOpacity>
 				</View>
 			</View>
@@ -107,14 +124,27 @@ const styles = StyleSheet.create({
 	customAmountContainer: {
 		width: '100%',
 		paddingVertical: 12,
+		backgroundColor: PALETTE.background,
+		borderRadius: 10,
+		marginTop: 12,
+		padding: 12
 	},
-	customAmountHelperText: {
-		color: PALETTE.text,
-		fontSize: 14,
+	customAmountHeader: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+	},
+	customAmountHeaderText: {
+		color: PALETTE.textWhite,
+		fontFamily: 'Inter_400Regular',
+		flex: 1,
 	},
 	customAmountInputContainer: {
 		flexDirection: 'row',
 		justifyContent: 'center',
+	},
+	customAmountInput: {
+		color: PALETTE.primary
 	},
 	customAmountSetButton: {
 		paddingVertical: 5,
@@ -139,28 +169,44 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 	},
+	defaultTimeSetButtonContainer: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		width: '100%',
+		gap: 12,
+		flexWrap: 'wrap',
+	},
 	defaultTimeSetButton: {
-		paddingVertical: 4,
+		paddingVertical: 18,
+		flex: 1,
+		flexBasis: '25%',
+		backgroundColor: PALETTE.background,
+		borderRadius: 10,
+		justifyContent: 'center',
+		alignItems: 'center'
+	},
+	chapterTimeSetButton: {
+		paddingVertical: 14,
 	},
 	inputHelperText: {
 		color: PALETTE.text,
 	},
 	timeSetButton: {
-		color: PALETTE.text,
+		color: PALETTE.textWhite,
 	},
 	modalView: {
 		width: '80%',
 		margin: 20,
-		backgroundColor: PALETTE.background,
+		backgroundColor: PALETTE.backgroundLight,
 		borderRadius: 20,
 		padding: 15,
 		alignItems: 'center',
-		shadowColor: '#fff',
+		shadowColor: PALETTE.primary,
 		shadowOffset: {
 			width: 0,
-			height: 2,
+			height: 1,
 		},
-		shadowOpacity: 0.25,
+		shadowOpacity: 0.05,
 		shadowRadius: 4,
 		elevation: 5,
 	},
@@ -176,5 +222,8 @@ const styles = StyleSheet.create({
 	headerText: {
 		color: PALETTE.text,
 		fontSize: 18,
+	},
+	cancelButton: {
+
 	}
 });

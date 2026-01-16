@@ -86,7 +86,9 @@ export default function Tab() {
           <View style={styles.sectionTitleContainer}>
             <Text style={styles.sectionTitle}>Continue Listening</Text>
             <TouchableOpacity>
-              <Text style={styles.sectionSeeAllText}>See All</Text>
+              <View>
+                <Text style={styles.sectionSeeAllText}>See All</Text>
+              </View>
             </TouchableOpacity>
           </View>
           <LinearGradient
@@ -99,9 +101,9 @@ export default function Tab() {
               <View style={{ flex: 1, paddingHorizontal: 12, justifyContent: 'center' }}>
                 <Text style={styles.lastPlayedTitle}>{downloadedBooks[0]?.name}</Text>
                 <Text style={styles.lastPlayedTitleAuthor}>{downloadedBooks[0]?.getArtist() || 'Eric Metaxas'}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12, flex: 1 }}>
                   <ProgressBar value={.42} baseColor="rgba(255, 255, 255, .25)" progressColor={PALETTE.textWhite} rounded={true} />
-                  <Text style={{ color: PALETTE.textWhite, fontFamily: 'Inter_400Regular', flex: 1 }}>42%</Text>
+                  <Text style={{ color: PALETTE.textWhite, fontFamily: 'Inter_400Regular' }}>42%</Text>
                 </View>
               </View>
             </View>
@@ -159,6 +161,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 24,
+    flex: 1,
   },
   sectionTitle: {
     color: PALETTE.textWhite,
@@ -168,7 +171,6 @@ const styles = StyleSheet.create({
   },
   sectionTitleLink: {
     flexDirection: 'row',
-    width: '100%',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,

@@ -36,6 +36,6 @@ const styles = StyleSheet.create({
 		position: 'relative',
 		height: 4,
 		flex: 1,
-		borderRadius: 50
+		borderRadius: 50,
 	},
 });

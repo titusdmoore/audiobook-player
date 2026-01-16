@@ -17,6 +17,7 @@ import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 import { encodeObjectToQueryParams, getPlayableById, fetchChildrenPlayables } from "@/utils";
 import { Playable } from "@/utils/classes/playable";
 import Slider from "@react-native-community/slider";
+import ProgressBar from "@/components/molecules/ProgresBar";
 
 
 function ChapterListItem({ index, item: chapter, playButtonAction }: { index: number, item: Playable, playButtonAction: any }) {
@@ -151,7 +152,7 @@ export default function TitleView() {
     }
 
     await setAppOption(db, "new_title_loaded", "true");
-    dispatch(setActiveTitle({ name: playable?.name, imagePath: playable?.imagePath }))
+    dispatch(setActiveTitle({ name: playable?.name, imagePath: playable?.imagePath }));
     router.navigate("/player");
   };
 
@@ -224,14 +225,12 @@ export default function TitleView() {
               <Text style={{ color: PALETTE.textOffWhite, fontFamily: 'Inter_500Medium', fontSize: 15 }}>Your Progress</Text>
               <Text style={{ color: PALETTE.primary, fontFamily: 'Inter_500Medium', fontSize: 15 }}>42%</Text>
             </View>
-            <View>
-              <Slider
-                style={{ width: '100%', height: 55 }}
-                minimumValue={0}
-                maximumValue={100}
-                value={45}
-                minimumTrackTintColor={PALETTE.primary}
-                maximumTrackTintColor={PALETTE.background}
+            <View style={{ paddingVertical: 12 }}>
+              <ProgressBar
+                progressColor={PALETTE.primary}
+                baseColor={PALETTE.background}
+                value={.42}
+                rounded={true}
               />
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

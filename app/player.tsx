@@ -110,12 +110,13 @@ export default function Modal() {
 
   useEffect(() => {
     (async () => {
-      console.log(activeTrack)
-      let titlePlayableRes = await getPlayableById(activeTrack?.parentItemId as string, jellyConfig, db)
-      setTitlePlayable(titlePlayableRes);
+      if (activeTrack) {
+        let titlePlayableRes = await getPlayableById(activeTrack?.parentItemId as string, jellyConfig, db)
+        setTitlePlayable(titlePlayableRes);
 
-      let chapterPlayableRes = await getPlayableById(activeTrack?.id, jellyConfig, db)
-      setChapterPlayable(chapterPlayableRes);
+        let chapterPlayableRes = await getPlayableById(activeTrack?.id, jellyConfig, db)
+        setChapterPlayable(chapterPlayableRes);
+      }
     })().then(() => { });
   }, [activeTrack]);
 
