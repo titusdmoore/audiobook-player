@@ -54,7 +54,6 @@ export default function Tab() {
       await setAppOption(db, 'jellyfinDomain', domain);
       dispatch(setAccessToken(userResponse.accessToken));
       dispatch(setJellyfinUser(userResponse.user));
-      await validateJellyConnection();
     } catch (error) {
       setErrorMessage("unable to login \n" + JSON.stringify(error) + message);
     }
@@ -69,6 +68,14 @@ export default function Tab() {
       await validateJellyConnection();
     })().then(() => { });
   }, []);
+
+  useEffect(() => {
+    if (jellyfinProvider.jellyfinAccessToken && jellyfinProvider.jellyfinDomain) {
+      (async () => {
+        await validateJellyConnection();
+      })().then(() => { });
+    }
+  }, [jellyfinProvider.jellyfinAccessToken]);
 
   const clearJellyfinProgress = async () => {
     await db.runAsync('DELETE FROM jellyfin_book_progress;');
