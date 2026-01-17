@@ -79,10 +79,13 @@ export default function Tab() {
       }
     })().then(() => { });
   }, [navigation, jellyfinProvider.jellyfinDomain, jellyfinProvider.jellyfinAccessToken])
+
+  console.log('in progress', inProgressBooks)
+
   return (
-    <SafeAreaView style={{}}>
-      <ScrollView contentContainerStyle={styles.sectionContainer}>
-        <View style={{ marginBottom: 24 }}>
+    <View style={{}}>
+      <ScrollView contentContainerStyle={styles.sectionsContainer}>
+        <View style={styles.sectionContainer}>
           <View style={styles.sectionTitleContainer}>
             <Text style={styles.sectionTitle}>Continue Listening</Text>
             <TouchableOpacity>
@@ -120,54 +123,67 @@ export default function Tab() {
             </View>
           </LinearGradient>
         </View>
-        <View>
-          <View style={styles.sectionTitleContainer}>
-            <TouchableOpacity style={styles.sectionTitleLink}>
-              <Text style={styles.sectionTitle}>Books Progress</Text>
-            </TouchableOpacity>
+        {(inProgressBooks && inProgressBooks.length > 0) && (
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionTitleContainer}>
+              <TouchableOpacity style={styles.sectionTitleLink}>
+                <Text style={styles.sectionTitle}>Books Progress</Text>
+              </TouchableOpacity>
+            </View>
+            <FlatList horizontal={true} data={inProgressBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
           </View>
-          <FlatList horizontal={true} data={inProgressBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
-        </View>
+        )}
 
-        <View>
-          <View style={styles.sectionTitleContainer}>
-            <TouchableOpacity style={styles.sectionTitleLink}>
+        {(recentBooks && recentBooks.length > 0) && (
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionTitleContainer}>
               <Text style={styles.sectionTitle}>New Releases</Text>
-              <FontAwesome6Pro name="angle-right" size={20} color={PALETTE.text} />
-            </TouchableOpacity>
+              <TouchableOpacity>
+                <View>
+                  <Text style={styles.sectionSeeAllText}>See All</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+            <FlatList horizontal={true} data={recentBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
           </View>
-          <FlatList horizontal={true} data={recentBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
-        </View>
-        <View>
-          <View style={styles.sectionTitleContainer}>
-            <TouchableOpacity style={styles.sectionTitleLink}>
+        )}
+
+        {(downloadedBooks && downloadedBooks.length > 0) && (
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionTitleContainer}>
               <Text style={styles.sectionTitle}>Downloaded Titles</Text>
-              <FontAwesome6Pro name="angle-right" size={20} color={PALETTE.text} />
-            </TouchableOpacity>
+              <TouchableOpacity>
+                <View>
+                  <Text style={styles.sectionSeeAllText}>See All</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+            <FlatList horizontal={true} data={downloadedBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
           </View>
-          <FlatList horizontal={true} data={downloadedBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
-        </View>
+        )}
       </ScrollView>
-    </SafeAreaView >
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
+  sectionsContainer: {
     paddingHorizontal: 24,
+  },
+  sectionContainer: {
+    marginBottom: 24,
   },
   sectionTitleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 18,
     flex: 1,
   },
   sectionTitle: {
     color: PALETTE.textWhite,
     fontFamily: 'Inter_600SemiBold',
     fontSize: 20,
-    flex: 1,
   },
   sectionTitleLink: {
     flexDirection: 'row',
