@@ -14,6 +14,7 @@ import { verifyApiKey } from "@/utils/book-providers/jellyfin";
 import { getAppOption, setAppOption } from "@/utils/db/db";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import CardListItem from "@/components/molecules/CardListItem";
+import ProgressBar from "@/components/molecules/ProgresBar";
 
 export default function Tab() {
   const db = useSQLiteContext();
@@ -155,19 +156,31 @@ export default function Tab() {
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>Storage</Text>
         <View style={styles.sectionCard}>
-          <View>
+          <View style={styles.storageInfoContainer}>
             <View>
-              <Text>Storage Used</Text>
-              <Text>2.5 GB of 64 GB</Text>
+              <Text style={styles.storageTitle}>Storage Used</Text>
+              <Text style={styles.storageSubTitle}>2.5 GB of 64 GB</Text>
             </View>
-            <Text>3.8%</Text>
+            <Text style={styles.storageAmount}>3.8%</Text>
           </View>
+          <ProgressBar
+            value={.15}
+            baseColor={PALETTE.grey}
+            progressColor={PALETTE.primary}
+            rounded={true}
+          />
+          <TouchableOpacity style={styles.storageButton}>
+            <Text style={styles.storageButtonText}>Manage Downloads</Text>
+          </TouchableOpacity>
         </View>
       </View>
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>Account</Text>
-        <View style={styles.sectionCard}>
-          <CardListItem title="Disconnect Jellyfin" iconBackgroundColor="rgba(255, 0, 0, .5)" />
+        <View style={[styles.sectionCard, { padding: 0 }]}>
+          <CardListItem
+            title="Disconnect Jellyfin"
+            iconBackgroundColor="rgba(255, 0, 0, .15)"
+            iconContent={<FontAwesome6Pro name="signal-bars-slash" color='red' />} />
         </View>
       </View>
     </ScrollView>
@@ -238,5 +251,31 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  storageInfoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12
+  },
+  storageTitle: {
+    color: PALETTE.textWhite,
+  },
+  storageSubTitle: {
+    color: PALETTE.textOffWhite
+  },
+  storageAmount: {
+    color: PALETTE.primary,
+    fontSize: 20,
+  },
+  storageButton: {
+    marginTop: 12,
+    backgroundColor: PALETTE.grey,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  storageButtonText: {
+    color: PALETTE.textWhite
   },
 });

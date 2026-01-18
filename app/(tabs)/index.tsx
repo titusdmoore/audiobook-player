@@ -106,7 +106,7 @@ export default function Tab() {
                 <Text style={styles.lastPlayedTitleAuthor}>{downloadedBooks[0]?.getArtist() || 'Eric Metaxas'}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12, flex: 1 }}>
                   <ProgressBar value={.42} baseColor="rgba(255, 255, 255, .25)" progressColor={PALETTE.textWhite} rounded={true} />
-                  <Text style={{ color: PALETTE.textWhite, fontFamily: 'Inter_400Regular' }}>42%</Text>
+                  <Text style={{ color: PALETTE.textWhite, /* fontFamily: 'Inter_400Regular' */ }}>42%</Text>
                 </View>
               </View>
             </View>
@@ -161,6 +161,45 @@ export default function Tab() {
             <FlatList horizontal={true} data={downloadedBooks} renderItem={(props) => (<ListTitleCardJelly {...props} horizontal={true} />)} />
           </View>
         )}
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionTitleContainer}>
+            <Text style={styles.sectionTitle}>Browse by Category</Text>
+          </View>
+          <View style={styles.categoriesContainer}>
+            <LinearGradient
+              colors={['#9333EA', '#6B21A8']}
+              end={{ x: 1, y: 1 }}
+              style={styles.categoryContainer}>
+              <FontAwesome6Pro name="brain" iconStyle="solid" size={25} color={PALETTE.textWhite} />
+              <Text style={styles.categoryTitle}>Self-Help</Text>
+              <Text style={styles.categorySubTitle}>145 Titles</Text>
+            </LinearGradient>
+            <LinearGradient
+              colors={['#2563EB', '#1E40AF']}
+              end={{ x: 1, y: 1 }}
+              style={styles.categoryContainer}>
+              <FontAwesome6Pro name="rocket" iconStyle="solid" size={25} color={PALETTE.textWhite} />
+              <Text style={styles.categoryTitle}>Sci-Fi</Text>
+              <Text style={styles.categorySubTitle}>221 Titles</Text>
+            </LinearGradient>
+            <LinearGradient
+              colors={['#16A34A', '#166534']}
+              end={{ x: 1, y: 1 }}
+              style={styles.categoryContainer}>
+              <FontAwesome6Pro name="cross" iconStyle="solid" size={25} color={PALETTE.textWhite} />
+              <Text style={styles.categoryTitle}>Religion</Text>
+              <Text style={styles.categorySubTitle}>98 Titles</Text>
+            </LinearGradient>
+            <LinearGradient
+              colors={['#DB2777', '#9D174D']}
+              end={{ x: 1, y: 1 }}
+              style={styles.categoryContainer}>
+              <FontAwesome6Pro name="sword" iconStyle="solid" size={25} color={PALETTE.textWhite} />
+              <Text style={styles.categoryTitle}>Fantasy</Text>
+              <Text style={styles.categorySubTitle}>176 Titles</Text>
+            </LinearGradient>
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -193,7 +232,7 @@ const styles = StyleSheet.create({
   },
   sectionSeeAllText: {
     color: PALETTE.primary,
-    fontFamily: 'Inter_400Regular',
+    // fontFamily: 'Inter_400Regular',
   },
   lastPlayedContainer: {
     borderRadius: 10,
@@ -223,5 +262,25 @@ const styles = StyleSheet.create({
     backgroundColor: PALETTE.textWhite,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  categoriesContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    flexWrap: 'wrap',
+  },
+  categoryContainer: {
+    flexBasis: '45%',
+    flex: 1,
+    borderRadius: 10,
+    padding: 12,
+  },
+  categoryTitle: {
+    color: PALETTE.textWhite,
+    fontSize: 18,
+    marginTop: 8,
+    marginBottom: 2
+  },
+  categorySubTitle: {
+    color: PALETTE.textOffWhite,
   }
 });
