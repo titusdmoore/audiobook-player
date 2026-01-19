@@ -20,6 +20,9 @@ export const PALETTE = {
 	textOffWhite: '#9CA3AF',
 	success: '#22C55E',
 	grey: '#262626',
+	greyLight: '#9CA3AF',
+	redLight: '#F87171',
+	error: '#EF4444'
 };
 
 export const AudiobookPlayerTheme: Theme = {

@@ -5,7 +5,7 @@ import { BookProviderDb } from "@/utils/db/schema";
 import { Link } from "expo-router";
 import { authenticateUserByName } from "@/utils/book-providers/jellyfin";
 import { useSQLiteContext } from "expo-sqlite";
-import { View, Text, StyleSheet, TouchableOpacity, Button, TextInput, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Button, TextInput, ScrollView, Switch } from "react-native";
 import { setAccessToken, setJellyfinDomain, setJellyfinUser } from "@/utils/slices/book-provider-slice";
 import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 import { useEffect, useState } from "react";
@@ -98,11 +98,114 @@ export default function Tab() {
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>App Settings</Text>
         <View style={styles.sectionCard}>
+          <CardListItem
+            title="Theme"
+            subtitle="Dark Mode"
+            iconBackgroundColor="rgba(139, 92, 246, .2)"
+            iconContent={<FontAwesome6Pro name="palette" size={15} iconStyle="solid" color='#8B5CF6' />}
+            actionContent={() => (
+              <TouchableOpacity>
+                <FontAwesome6Pro name="angle-right" size={20} iconStyle="solid" color={PALETTE.textWhite} />
+              </TouchableOpacity>
+            )}
+          />
+          <CardListItem
+            title="Language"
+            subtitle="English"
+            iconBackgroundColor="rgba(59, 130, 246, .2)"
+            iconContent={<FontAwesome6Pro name="language" size={15} iconStyle="solid" color='#3B82F6' />}
+            actionContent={() => (
+              <TouchableOpacity>
+                <FontAwesome6Pro name="angle-right" size={20} iconStyle="solid" color={PALETTE.textWhite} />
+              </TouchableOpacity>
+            )}
+          />
+          <CardListItem
+            title="Download Quality"
+            subtitle="High (128 kbps)"
+            iconBackgroundColor="rgba(34, 197, 94, .2)"
+            iconContent={<FontAwesome6Pro name="download" size={15} iconStyle="solid" color='#22C55E' />}
+            actionContent={() => (
+              <TouchableOpacity>
+                <FontAwesome6Pro name="angle-right" size={20} iconStyle="solid" color={PALETTE.textWhite} />
+              </TouchableOpacity>
+            )}
+          />
+          <CardListItem
+            title="Stream Quality"
+            subtitle="Auto"
+            iconBackgroundColor="rgba(249, 115, 22, .2)"
+            iconContent={<FontAwesome6Pro name="wifi" size={15} iconStyle="solid" color='#F97316' />}
+            actionContent={() => (
+              <TouchableOpacity>
+                <FontAwesome6Pro name="angle-right" size={20} iconStyle="solid" color={PALETTE.textWhite} />
+              </TouchableOpacity>
+            )}
+          />
+          <CardListItem
+            title="Notifications"
+            subtitle="Enabled"
+            style={{ borderBottomWidth: 0 }}
+            iconBackgroundColor="rgba(236, 72, 153, .2)"
+            iconContent={<FontAwesome6Pro name="bell" size={15} iconStyle="solid" color='#EC4899' />}
+            actionContent={() => {
+              const [isEnabled, setIsEnabled] = useState<boolean>(false);
+
+              return (
+                <Switch
+                  trackColor={{ false: PALETTE.grey, true: PALETTE.primary }}
+                  thumbColor={isEnabled ? PALETTE.textWhite : PALETTE.greyLight}
+                  ios_backgroundColor={PALETTE.grey}
+                  value={isEnabled}
+                  onValueChange={() => setIsEnabled(!isEnabled)}
+                />
+              )
+            }}
+          />
         </View>
       </View>
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>Playback</Text>
         <View style={styles.sectionCard}>
+          <CardListItem
+            title="Auto-Play Next"
+            subtitle="Continue to next book"
+            iconBackgroundColor="rgba(168, 85, 247, .2)"
+            iconContent={<FontAwesome6Pro name="forward" size={15} iconStyle="solid" color='#A855F7' />}
+            actionContent={() => {
+              const [isEnabled, setIsEnabled] = useState<boolean>(false);
+
+              return (
+                <Switch
+                  trackColor={{ false: PALETTE.grey, true: PALETTE.primary }}
+                  thumbColor={isEnabled ? PALETTE.textWhite : PALETTE.greyLight}
+                  ios_backgroundColor={PALETTE.grey}
+                  value={isEnabled}
+                  onValueChange={() => setIsEnabled(!isEnabled)}
+                />
+              )
+            }}
+          />
+          <CardListItem
+            title="Car Mode"
+            subtitle="Large Controls"
+            style={{ borderBottomWidth: 0 }}
+            iconBackgroundColor="rgba(6, 182, 212, .2)"
+            iconContent={<FontAwesome6Pro name="car" size={15} iconStyle="solid" color='#06B6D4' />}
+            actionContent={() => {
+              const [isEnabled, setIsEnabled] = useState<boolean>(false);
+
+              return (
+                <Switch
+                  trackColor={{ false: PALETTE.grey, true: PALETTE.primary }}
+                  thumbColor={isEnabled ? PALETTE.textWhite : PALETTE.greyLight}
+                  ios_backgroundColor={PALETTE.grey}
+                  value={isEnabled}
+                  onValueChange={() => setIsEnabled(!isEnabled)}
+                />
+              )
+            }}
+          />
         </View>
       </View>
       <View style={[styles.sectionContainer]}>
@@ -155,7 +258,7 @@ export default function Tab() {
       </View>
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>Storage</Text>
-        <View style={styles.sectionCard}>
+        <View style={[styles.sectionCard, { padding: 12 }]}>
           <View style={styles.storageInfoContainer}>
             <View>
               <Text style={styles.storageTitle}>Storage Used</Text>
@@ -178,9 +281,36 @@ export default function Tab() {
         <Text style={styles.sectionTitle}>Account</Text>
         <View style={[styles.sectionCard, { padding: 0 }]}>
           <CardListItem
+            title="Privacy & Security"
+            iconBackgroundColor="rgba(234, 179, 8, .2)"
+            iconContent={<FontAwesome6Pro name="shield" iconStyle="solid" color='#EAB308' />}
+            actionContent={() => (
+              <TouchableOpacity>
+                <FontAwesome6Pro name="angle-right" size={20} iconStyle="solid" color={PALETTE.textWhite} />
+              </TouchableOpacity>
+            )}
+          />
+          <CardListItem
+            title="About"
+            iconBackgroundColor="rgba(238, 68, 68, .2)"
+            iconContent={<FontAwesome6Pro name="circle-info" color={PALETTE.error} />}
+            actionContent={() => (
+              <TouchableOpacity>
+                <FontAwesome6Pro name="angle-right" size={20} iconStyle="solid" color={PALETTE.textWhite} />
+              </TouchableOpacity>
+            )}
+          />
+          <CardListItem
             title="Disconnect Jellyfin"
-            iconBackgroundColor="rgba(255, 0, 0, .15)"
-            iconContent={<FontAwesome6Pro name="signal-bars-slash" color='red' />} />
+            titleStyle={{ color: PALETTE.redLight }}
+            iconBackgroundColor="rgba(107, 114, 128, .2)"
+            iconContent={<FontAwesome6Pro name="signal-bars-slash" iconStyle="solid" color={PALETTE.greyLight} />} />
+          <CardListItem
+            title="Logout"
+            style={{ borderBottomWidth: 0 }}
+            titleStyle={{ color: PALETTE.redLight }}
+            iconBackgroundColor="rgba(107, 114, 128, .2)"
+            iconContent={<FontAwesome6Pro name="arrow-right-from-bracket" iconStyle="solid" color={PALETTE.greyLight} />} />
         </View>
       </View>
     </ScrollView>
@@ -203,7 +333,6 @@ const styles = StyleSheet.create({
   sectionCard: {
     backgroundColor: PALETTE.backgroundLight,
     borderRadius: 10,
-    padding: 12,
   },
   jellyfinCardContainer: {
     padding: 0
