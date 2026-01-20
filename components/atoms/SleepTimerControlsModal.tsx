@@ -47,7 +47,7 @@ export default function SleepTimerControlsModal({ isOpen, setIsOpen, sleepTimer,
 					<View style={styles.headerContainer}>
 						<View>
 							<Text style={styles.headerText}>Sleep Timer</Text>
-							<Text style={{}}>Auto-pause after duration</Text>
+							<Text style={styles.modalSubtitle}>Auto-pause after duration</Text>
 						</View>
 						<TouchableOpacity style={{ padding: 4 }} onPress={() => setIsOpen(!isOpen)}>
 							<FontAwesome6Pro name='x' size={16} color={PALETTE.text} />
@@ -79,7 +79,7 @@ export default function SleepTimerControlsModal({ isOpen, setIsOpen, sleepTimer,
 							<Text style={styles.timeSetButton}>1h</Text>
 						</TouchableOpacity>
 						<TouchableOpacity style={[styles.defaultTimeSetButton, styles.chapterTimeSetButton]} onPress={() => handleTimerSet(15)}>
-							<FontAwesome6Pro name='clock' iconStyle="solid" size={16} color={PALETTE.primary} />
+							<FontAwesome6Pro name='book-open' iconStyle="solid" size={16} color={PALETTE.primary} />
 							<Text style={styles.timeSetButton}>End of chapter</Text>
 						</TouchableOpacity>
 					</View>
@@ -88,26 +88,29 @@ export default function SleepTimerControlsModal({ isOpen, setIsOpen, sleepTimer,
 							<Text style={styles.customAmountHeaderText}>Custom time (minutes)</Text>
 							<TextInput keyboardType="number-pad" style={styles.customAmountInput} selectTextOnFocus={true} value={customAmount} onChangeText={setCustomAmount} />
 						</View>
-						<View>
-							<TouchableOpacity style={styles.customAmountSetButton}>
+						<View style={styles.sliderContainer}>
+							<Slider
+								style={{ flex: 1, height: 20 }}
+								minimumValue={0}
+								value={parseInt(customAmount)}
+								maximumValue={100}
+								minimumTrackTintColor={PALETTE.primary}
+								maximumTrackTintColor={PALETTE.text}
+								thumbTintColor={PALETTE.primary}
+								step={1}
+								onValueChange={value => setCustomAmount(value.toString())}
+							/>
+							<TouchableOpacity
+								style={styles.customAmountSetButton}
+								onPress={() => handleTimerSet(parseInt(customAmount))}
+							>
 								<Text style={styles.customAmountButtonText}>Set</Text>
 							</TouchableOpacity>
 						</View>
 					</View>
-					{ /*<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(5)}>
-						<Text style={styles.timeSetButton}>5 Minutes</Text>
-					</TouchableOpacity>
-					<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(10)}>
-						<Text style={styles.timeSetButton}>10 Minutes</Text>
-					</TouchableOpacity>
-					<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(30)}>
-						<Text style={styles.timeSetButton}>30 Minutes</Text>
-					</TouchableOpacity>
-					<TouchableOpacity style={styles.defaultTimeSetButton} onPress={() => handleTimerSet(60)}>
-						<Text style={styles.timeSetButton}>1 Hour</Text>
-					</TouchableOpacity> */}
 					<TouchableOpacity style={styles.cancelButton} onPress={() => handleTimerSet(null)}>
-						<Text style={styles.timeSetButton}>Cancel Timer</Text>
+						<FontAwesome6Pro name='x' iconStyle="solid" size={16} color={PALETTE.redLight} />
+						<Text style={styles.cancelButtonText}>Cancel Timer</Text>
 					</TouchableOpacity>
 				</View>
 			</View>
@@ -120,6 +123,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
+		backgroundColor: 'rgba(10, 10, 15, .9)'
 	},
 	customAmountContainer: {
 		width: '100%',
@@ -169,6 +173,9 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 	},
+	modalSubtitle: {
+		color: PALETTE.textOffWhite
+	},
 	defaultTimeSetButtonContainer: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
@@ -187,6 +194,9 @@ const styles = StyleSheet.create({
 	},
 	chapterTimeSetButton: {
 		paddingVertical: 14,
+		flexDirection: 'row',
+		gap: 8,
+		alignItems: 'center'
 	},
 	inputHelperText: {
 		color: PALETTE.text,
@@ -218,12 +228,30 @@ const styles = StyleSheet.create({
 		width: '100%',
 		alignItems: 'center',
 		justifyContent: 'space-between',
+		marginBottom: 24,
 	},
 	headerText: {
 		color: PALETTE.text,
 		fontSize: 18,
 	},
+	sliderContainer: {
+		flexDirection: 'row',
+		alignItems: 'center'
+	},
 	cancelButton: {
-
+		backgroundColor: 'rgba(238, 68, 68, .2)',
+		paddingVertical: 12,
+		borderRadius: 10,
+		width: '100%',
+		marginTop: 12,
+		alignItems: 'center',
+		justifyContent: 'center',
+		flexDirection: 'row',
+		gap: 6,
+	},
+	cancelButtonText: {
+		color: PALETTE.redLight,
+		fontSize: 16,
+		fontWeight: '500'
 	}
 });
