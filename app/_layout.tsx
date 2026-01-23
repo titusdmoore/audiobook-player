@@ -8,7 +8,7 @@ import { store } from '@/utils/store';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks';
 import { setAccessToken, setDropboxInitialized, setDropboxTokens, setJellyfinDomain, setJellyfinUser } from '@/utils/slices/book-provider-slice';
 import { DropboxProvider } from '@/utils/book-providers/dropbox';
-import { setInitialized } from '@/utils/slices/audio-player-slice';
+import { initializeSleepTimer, setInitialized } from '@/utils/slices/audio-player-slice';
 import { SQLiteProvider, useSQLiteContext } from 'expo-sqlite';
 import { getAppOption, migrateDbIfNeeded, setAppOption } from '@/utils/db/db';
 import { Text, TouchableOpacity, View } from 'react-native';
@@ -38,6 +38,11 @@ function AppInitializer() {
       let username = (await getAppOption(db, 'jellyfinUsername'))?.option_value ?? '';
       let password = (await getAppOption(db, 'jellyfinPassword'))?.option_value ?? '';
       let accessToken = (await getAppOption(db, 'jellyfinAccessToken'))?.option_value ?? '';
+
+      let sleepTimer = await getAppOption(db, "sleep_timer");
+      if (sleepTimer && sleepTimer.option_value) {
+        dispatch(initializeSleepTimer(parseInt(sleepTimer.option_value)));
+      }
 
       if (!bookProvider.jellyfinDomain) {
         dispatch(setJellyfinDomain(domain));

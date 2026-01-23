@@ -1,7 +1,7 @@
 // import { fetch } from "expo/fetch";
 
 import { SQLiteDatabase } from "expo-sqlite";
-import { convertToValidFilename, encodeObjectToQueryParams } from "..";
+import { convertToValidFilename, encodeObjectToQueryParams, getPlayableById } from "..";
 import { getAudiobookDir, mimeToExtension, ROOT_AUDIOBOOK_DIR } from "../file-system";
 import { File } from "expo-file-system";
 import { createItem } from "../db/db";
@@ -237,8 +237,25 @@ export async function downloadTitle(db: SQLiteDatabase, domain: string, accessTo
 	}
 }
 
+export async function searchForBooks(searchTerm: string, domain: string, accessToken: string) {
+	let searchRes = await fetch(`${domain}/Items/RemoteSearch/Book`, {
+		method: 'POST',
+		body: JSON.stringify({ SearchInfo: { Name: searchTerm } }),
+		headers: new Headers({
+			'accept': 'application/json',
+			'Content-Type': 'application/json',
+			'x-emby-authorization': 'Mediabrowser Client="audiobook-player", Device="mydevice", DeviceId="myid", Version="1.0.0"'
+		}),
+	});
+}
+
 export default async function removeTitleFromDevice(db: SQLiteDatabase, titleId: string) {
 	try {
+		let titlePlayable = await getPlayableById(titleId, null, db);
+
+		if (titlePlayable) {
+			let titleDir = getAudiobookDir(titlePlayable?.name, true);
+		}
 
 	} catch (e) {
 		console.error(e);

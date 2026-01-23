@@ -12,6 +12,7 @@ import moment from "moment";
 import { useAppDispatch } from "@/utils/hooks";
 import { setSleepTimer as setStoreSleepTimer } from "@/utils/slices/book-provider-slice";
 import AdditionalControlsButton from "../atoms/AdditionalControlsButton";
+import { initializeSleepTimer } from "@/utils/slices/audio-player-slice";
 // import { useTrackPlayerEvents, Event, State } from "react-native-track-player";
 
 
@@ -35,7 +36,7 @@ export default function AdditionalTrackActions() {
 
 			var newDateObj = moment(new Date()).add(sleepTimer, 'm').toDate();
 			await setAppOption(db, "sleep_timer", newDateObj.getTime().toString());
-			dispatch(setStoreSleepTimer(newDateObj.getTime()));
+			dispatch(initializeSleepTimer(newDateObj.getTime()));
 		})().then(() => { });
 	}, [sleepTimer]);
 

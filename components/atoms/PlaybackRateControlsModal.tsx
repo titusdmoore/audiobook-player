@@ -45,31 +45,37 @@ export default function PlaybackRateControlsModal({ isOpen, setIsOpen, playbackR
 							}}
 						/>
 						<View style={styles.playbackRateControlsContainer}>
-							<TouchableOpacity style={styles.defaultPlaybackRateButton} onPress={() => { }}>
+							<TouchableOpacity
+								style={styles.defaultPlaybackRateButton}
+								onPress={() => setPlaybackRate(Math.max(playbackRate - .05, .5))}
+							>
 								<FontAwesome6Pro name='minus' iconStyle="solid" size={16} color={PALETTE.primary} />
 								<Text style={styles.playbackRateButtonText}>Slower</Text>
 							</TouchableOpacity>
-							<TouchableOpacity style={styles.defaultPlaybackRateButton} onPress={() => { }}>
+							<TouchableOpacity style={styles.defaultPlaybackRateButton} onPress={() => setPlaybackRate(1)}>
 								<FontAwesome6Pro name='rotate-left' iconStyle="solid" size={16} color={PALETTE.primary} />
 								<Text style={styles.playbackRateButtonText}>Reset</Text>
 							</TouchableOpacity>
-							<TouchableOpacity style={styles.defaultPlaybackRateButton} onPress={() => { }}>
+							<TouchableOpacity
+								style={styles.defaultPlaybackRateButton}
+								onPress={() => setPlaybackRate(Math.min(playbackRate + .05, 3.5))}
+							>
 								<FontAwesome6Pro name='plus' iconStyle="solid" size={16} color={PALETTE.primary} />
 								<Text style={styles.playbackRateButtonText}>Faster</Text>
 							</TouchableOpacity>
 						</View>
 					</View>
 					<View style={styles.quickPresetContainer}>
-						<TouchableOpacity style={styles.defaultQuickPresetButton} onPress={() => { }}>
+						<TouchableOpacity style={styles.defaultQuickPresetButton} onPress={() => setPlaybackRate(.75)}>
 							<Text style={styles.quickPresetButtonText}>0.75x</Text>
 						</TouchableOpacity>
-						<TouchableOpacity style={styles.defaultQuickPresetButton} onPress={() => { }}>
+						<TouchableOpacity style={styles.defaultQuickPresetButton} onPress={() => setPlaybackRate(1)}>
 							<Text style={styles.quickPresetButtonText}>1.0x</Text>
 						</TouchableOpacity>
-						<TouchableOpacity style={styles.defaultQuickPresetButton} onPress={() => { }}>
+						<TouchableOpacity style={styles.defaultQuickPresetButton} onPress={() => setPlaybackRate(1.5)}>
 							<Text style={styles.quickPresetButtonText}>1.5x</Text>
 						</TouchableOpacity>
-						<TouchableOpacity style={styles.defaultQuickPresetButton} onPress={() => { }}>
+						<TouchableOpacity style={styles.defaultQuickPresetButton} onPress={() => setPlaybackRate(2)}>
 							<Text style={styles.quickPresetButtonText}>2.0x</Text>
 						</TouchableOpacity>
 					</View>

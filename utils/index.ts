@@ -35,11 +35,14 @@ export type FetchItemOptions = {
 	userId: string,
 };
 
-export async function getPlayableById(id: string, fetchOptions: FetchItemOptions, db: SQLiteDatabase): Promise<Playable | null> {
+export async function getPlayableById(id: string, fetchOptions: FetchItemOptions | null, db: SQLiteDatabase): Promise<Playable | null> {
 	let title = await getDownloadedTitleById(db, id);
 	if (title) {
 		return new DbPlayable(title);
 	}
+
+	// Adds support for skipping sending in fetch options, allowing offline fetch (added 01/23/2026 for un-downloading)
+	if (!fetchOptions) { return null; }
 
 	let jellyTitleRes = await fetchItem(fetchOptions.domain, fetchOptions.accessToken, fetchOptions.userId, id);
 	if (jellyTitleRes.ok) {

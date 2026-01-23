@@ -14,19 +14,21 @@ import { getAppOption } from "@/utils/db/db";
 import { useSQLiteContext } from "expo-sqlite";
 import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 import { getPlayableById } from "@/utils";
+import { useSelector } from "react-redux";
+import useRemainingSleepTime from "@/utils/hooks/useRemainingSleepTime";
 
-export function TitleImage({ sleepTimer, activeTitle }: { sleepTimer: number | null, activeTitle: Playable | null }) {
-  const { height, width } = useWindowDimensions();
-  console.log(activeTitle)
+export function TitleImage({ activeTitle }: { activeTitle: Playable | null }) {
+  const { width } = useWindowDimensions();
+  const endTime = useAppSelector(state => state.audioPlayer.sleepTimerEndTime);
+  const remainingSeconds = useRemainingSleepTime(endTime);
 
-  if (sleepTimer !== null) {
-    console.log('sleep timer', sleepTimer)
+  if (remainingSeconds !== null && remainingSeconds !== 0) {
     return (
       <View style={styles.titleImageContainer}>
-        <View style={styles.sleepTimerContainer}>
-          <Text style={styles.sleepTimerText}>{formatAudioProgressTime(sleepTimer)}</Text>
+        <View style={[styles.sleepTimerContainer, styles.image, { width: width * .65, height: width * .65 }]}>
+          <Text style={styles.sleepTimerText}>{formatAudioProgressTime(remainingSeconds)}</Text>
         </View>
-        <Image source={activeTitle?.imagePath} style={styles.image} />
+        <Image source={activeTitle?.imagePath} style={[styles.image, { width: width * .65, height: width * .65 }]} />
       </View>
     );
   }
@@ -62,8 +64,6 @@ export default function Modal() {
   const audioPlayer = useAppSelector(state => state.audioPlayer);
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
   const activeTrack = useActiveTrack();
-  // TODO: convert to context
-  const [remainingSleepTimer, setRemainingSleepTimer] = useState<number | null>(null);
   const db = useSQLiteContext();
   const [chapterPlayable, setChapterPlayable] = useState<Playable | null>(null);
   const [titlePlayable, setTitlePlayable] = useState<Playable | null>(null);
@@ -73,40 +73,6 @@ export default function Modal() {
     accessToken: jellyfinProvider.jellyfinAccessToken ?? '',
     userId: jellyfinProvider.jellyfinUser?.Id
   };
-
-  const handleSleepTimerDisplay = () => {
-    if (jellyfinProvider.sleepTimer) {
-      const timerInterval = setInterval(() => {
-        setRemainingSleepTimer((prevTime) => {
-          console.log('prev time', prevTime)
-          if (prevTime === 0) {
-            clearInterval(timerInterval);
-            // Perform actions when the timer reaches zero
-            console.log('Countdown complete!');
-            return null;
-          } else if (prevTime == null) {
-            if (jellyfinProvider.sleepTimer) {
-              let timerDate = new Date(jellyfinProvider.sleepTimer);
-              let now = new Date();
-
-              return Math.round((timerDate.getTime() - now.getTime()) / 1000);
-            }
-
-            return null;
-          } else {
-            return prevTime - 1;
-          }
-        });
-      }, 1000);
-
-      // Cleanup the interval when the component unmounts
-      return () => clearInterval(timerInterval);
-    }
-  };
-
-  useEffect(() => {
-    handleSleepTimerDisplay();
-  }, [jellyfinProvider.sleepTimer]);
 
   useEffect(() => {
     (async () => {
@@ -120,16 +86,9 @@ export default function Modal() {
     })().then(() => { });
   }, [activeTrack]);
 
-  useEffect(() => {
-    if (!remainingSleepTimer) {
-      handleSleepTimerDisplay();
-    }
-  }, []);
-
   return (
     <View style={styles.rootContainer}>
-      {remainingSleepTimer && (<Text style={{ color: PALETTE.text }}>{formatAudioProgressTime(remainingSleepTimer)}</Text>)}
-      <TitleImage sleepTimer={remainingSleepTimer} activeTitle={titlePlayable} />
+      <TitleImage activeTitle={titlePlayable} />
       <View style={styles.metaContainer}>
         <Text style={styles.title}>{titlePlayable?.name}</Text>
         {/* TODO: Remove Eric */}
@@ -189,8 +148,11 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0,.6)',
+    backgroundColor: 'rgba(0,0,0,.7)',
+    elevation: 10,
     zIndex: 99,
+    left: '50%',
+    transform: 'translateX(-135%)',
   },
   sleepTimerText: {
     color: PALETTE.text,
