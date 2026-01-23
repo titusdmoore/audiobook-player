@@ -20,55 +20,6 @@ import Slider from "@react-native-community/slider";
 import ProgressBar from "@/components/molecules/ProgresBar";
 
 
-function ChapterListItem({ index, item: chapter, playButtonAction }: { index: number, item: Playable, playButtonAction: any }) {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 45, width: '100%', paddingHorizontal: 10 }}>
-      <Text style={{ color: PALETTE.text, flexBasis: '85%' }}>{chapter.name}</Text>
-      <TouchableOpacity style={{}} onPress={() => playButtonAction(index)}>
-        <FontAwesome6Pro name="circle-play" size={20} color={PALETTE.text} />
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-function ChaptersModal({ chapters, isOpen, setIsOpen, chapterSelect }: { chapters: any[], isOpen: boolean, setIsOpen: any, chapterSelect: any }) {
-  return (
-    <Modal visible={isOpen} transparent={true}>
-      <SafeAreaView style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalHeaderText}>Chapters</Text>
-            <TouchableOpacity onPress={() => setIsOpen(!isOpen)}>
-              <FontAwesome6Pro name="x" size={15} color={PALETTE.text} />
-            </TouchableOpacity>
-          </View>
-          <FlatList data={chapters} style={{ rowGap: 5, width: '100%' }} renderItem={(props) => (<ChapterListItem {...props} playButtonAction={chapterSelect} />)} />
-        </View>
-      </SafeAreaView>
-    </Modal>
-  );
-}
-
-export function TitleHeader({ navigation, route, options, back }: any) {
-  const insets = useSafeAreaInsets();
-
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'transparent', paddingTop: insets.top + 6, paddingBottom: 6, paddingHorizontal: 24, justifyContent: 'space-between' }}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
-        <FontAwesome6Pro name="arrow-left" iconStyle="solid" size={16} color={PALETTE.textWhite} />
-      </TouchableOpacity>
-      <View style={{ flexDirection: 'row', gap: 6 }}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
-          <FontAwesome6Pro name="share-nodes" size={16} color={PALETTE.textWhite} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
-          <FontAwesome6Pro name="heart" size={16} color={PALETTE.textWhite} />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-}
-
 export default function TitleView() {
   const { titleId } = useLocalSearchParams();
   const [chapters, setChapters] = useState<Playable[]>([]);
@@ -386,28 +337,6 @@ const styles = StyleSheet.create({
   downloadButtonText: {
     color: PALETTE.primary,
   },
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: PALETTE.background,
-    borderRadius: 20,
-    paddingTop: 15,
-    paddingHorizontal: 15,
-    paddingBottom: 15,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
   aboutBookTextContainer: {
     backgroundColor: PALETTE.backgroundLight,
     borderRadius: 10,
@@ -458,16 +387,5 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: '#252530',
     flexDirection: 'row',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: 15,
-    width: '100%',
-  },
-  modalHeaderText: {
-    color: PALETTE.text,
-    fontSize: 18,
   },
 });

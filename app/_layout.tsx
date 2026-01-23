@@ -17,8 +17,8 @@ import { authenticateUserByName, fetchUser, getUserById, verifyApiKey } from '@/
 import { PlaybackService } from '@/service';
 import { Storage } from 'expo-sqlite/kv-store';
 import * as Inter from '@expo-google-fonts/inter';
-import { TitleHeader } from './[titleId]';
 import { PlayerHeader } from './player';
+import { TitleHeader } from '@/components/molecules/TitleHeader';
 
 function AppInitializer() {
   const dispatch = useAppDispatch();

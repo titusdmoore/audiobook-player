@@ -1,46 +1,24 @@
 import { useEffect, useState } from "react";
-import { FlatList, StyleSheet, TouchableOpacity, View, Text, TextInput, ScrollView, Touchable } from "react-native";
+import { FlatList, StyleSheet, TouchableOpacity, View, Text, TextInput, ScrollView } from "react-native";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
-import { ListTitleCardJelly } from "@/components/molecules/ListTitleCard";
 import { authenticateUserByName, fetchAudiobooks, Item } from "@/utils/book-providers/jellyfin";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { setAccessToken, setJellyfinUser } from "@/utils/slices/book-provider-slice";
-import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { Storage } from "expo-sqlite/kv-store";
 import { getAppOption } from "@/utils/db/db";
 import { useSQLiteContext } from "expo-sqlite";
-import { JellyPlayable } from "@/utils/classes/jelly-playable";
 import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 import { PALETTE } from "@/utils/colors";
 import TitleListCardHorizontal from "@/components/molecules/TitleListCardHorizontal";
 import { getPlayableById } from "@/utils";
 import { Playable } from "@/utils/classes/playable";
-import { calculateNewStiffnessToMatchDuration } from "react-native-reanimated/lib/typescript/animation/spring";
-
-export function LibraryHeader({ navigation, route, options, back }: any) {
-  const insets = useSafeAreaInsets();
-
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', paddingTop: insets.top + 8, paddingBottom: 8, paddingHorizontal: 24, justifyContent: 'space-between', backgroundColor: 'transparent' }}>
-      <Text style={styles.headerTitle}>My Library</Text>
-      <View style={{ flexDirection: 'row', gap: 6 }}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
-          <FontAwesome6Pro name="arrow-down-wide-short" iconStyle="solid" size={16} color={PALETTE.primary} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
-          <FontAwesome6Pro name="filter" iconStyle="solid" size={16} color={PALETTE.primary} />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-}
 
 export default function Tab() {
   const [booksJelly, setBooksJelly] = useState<any[]>([]);
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
   const dispatch = useAppDispatch();
   const { searchTerm } = useLocalSearchParams();
-  const [searchInput, setSearchInput] = useState<string>('');
+  const [searchInput, setSearchInput] = useState<string>(searchTerm as string ?? '');
   const db = useSQLiteContext();
 
   const jellyConfig = {
@@ -48,11 +26,13 @@ export default function Tab() {
     accessToken: jellyfinProvider.jellyfinAccessToken ?? '',
     userId: jellyfinProvider.jellyfinUser?.Id
   };
-  // const global = useGlobalSearchParams();
-
 
   const fetchMoreBooks = async () => {
-    let booksResponse = await fetchAudiobooks(jellyfinProvider.jellyfinDomain ?? '', jellyfinProvider.jellyfinAccessToken ?? '', { limit: 14, startIndex: booksJelly.length - 1 });
+    let booksResponse = await fetchAudiobooks(
+      jellyfinProvider.jellyfinDomain ?? '',
+      jellyfinProvider.jellyfinAccessToken ?? '',
+      { limit: 14, startIndex: booksJelly.length - 1 }
+    );
 
     if (booksResponse && booksResponse.ok) {
       let additionalBooks = await booksResponse.json();
@@ -109,7 +89,13 @@ export default function Tab() {
       }}
     >
       <View style={styles.inputContainer}>
-        <TextInput style={styles.input} placeholderTextColor={PALETTE.textOffWhite} placeholder="Search your library..." value={searchTerm as any} onChangeText={setSearchInput} />
+        <TextInput
+          style={styles.input}
+          placeholderTextColor={PALETTE.textOffWhite}
+          placeholder="Search your library..."
+          value={searchInput}
+          onChangeText={setSearchInput}
+        />
         <FontAwesome6Pro name="magnifying-glass" iconStyle="solid" size={16} color={PALETTE.textOffWhite} style={styles.inputIcon} />
       </View>
       <View style={{ height: 60 }}>
@@ -175,20 +161,6 @@ export default function Tab() {
 }
 
 const styles = StyleSheet.create({
-  headerButton: {
-    backgroundColor: 'rgba(107, 114, 128, .15)',
-    backdropFilter: 'blur(10px)',
-    borderRadius: '100%',
-    width: 35,
-    height: 35,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 20,
-    color: PALETTE.textWhite,
-  },
   infoItemsContainer: {
     flexDirection: 'row',
     width: '100%',

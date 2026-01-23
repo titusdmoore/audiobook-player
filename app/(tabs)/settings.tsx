@@ -20,7 +20,6 @@ export default function Tab() {
   const db = useSQLiteContext();
   const dispatch = useAppDispatch();
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
-  const dropboxProvider = useAppSelector(state => state.bookProvider);
   const [jellyIsConnected, setJellyIsConnected] = useState<boolean>(false);
   const [passwordHidden, setPasswordHidden] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string>('');
