@@ -69,6 +69,25 @@ export async function fetchItem(domain: string, accessToken: string, userId: str
 	return response;
 }
 
+export async function getSearchHints(domain: string, accessToken: string, searchKey: string) {
+	let hintOptions = {
+		limit: 10,
+		searchTerm: searchKey,
+		parentId: '4e985111ed7f570b595204d82adb02f3',
+		// TODO: Update to AudioBook when Multi-Part Audiobook PR finally hits jellyfin
+		includeItemTypes: 'Folder'
+	};
+
+	let response = await fetch(`${domain}/Search/Hints?${encodeObjectToQueryParams(hintOptions)}`, {
+		headers: new Headers({
+			'accept': 'application/json',
+			'Authorization': `MediaBrowser Token="${accessToken}"`
+		})
+	});
+
+	return response;
+}
+
 export async function getUserById(domain: string, id: string, accessToken: string) {
 	let response = await fetch(`${domain}/Users/${id}`, {
 		headers: new Headers({
@@ -87,7 +106,9 @@ export type FetchAudiobookOptions = {
 	enableTotalRecordCount?: boolean;
 	enableImages?: boolean;
 	sortBy?: string;
+	includeItemTypes?: string[];
 	excludeItemIds?: string[];
+	recursive?: boolean;
 	searchTerm?: string;
 };
 

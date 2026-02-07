@@ -1,6 +1,4 @@
 import { useAppDispatch, useAppSelector } from '@/utils/hooks';
-import { DropboxProvider } from './book-providers/dropbox';
-import { setDropboxInitialized, setDropboxTokens } from './slices/book-provider-slice';
 import TrackPlayer from 'react-native-track-player';
 import { setInitialized } from './slices/audio-player-slice';
 import { Playable } from './classes/playable';
@@ -77,3 +75,18 @@ export async function fetchChildrenPlayables(playable: Playable, db: SQLiteDatab
 		return [];
 	}
 }
+
+export const debounce = <T extends (...args: any[]) => void>(
+	callback: T,
+	waitFor: number
+) => {
+	let timeout: ReturnType<typeof setTimeout> | undefined;
+
+	return (...args: Parameters<T>) => {
+		if (timeout) clearTimeout(timeout);
+
+		timeout = setTimeout(() => {
+			callback(...args);
+		}, waitFor);
+	};
+};

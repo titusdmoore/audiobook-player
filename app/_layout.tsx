@@ -6,8 +6,7 @@ import TrackPlayer, { Capability, Event, PlaybackActiveTrackChangedEvent, Playba
 import { Provider } from 'react-redux';
 import { store } from '@/utils/store';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks';
-import { setAccessToken, setDropboxInitialized, setDropboxTokens, setJellyfinDomain, setJellyfinUser } from '@/utils/slices/book-provider-slice';
-import { DropboxProvider } from '@/utils/book-providers/dropbox';
+import { setAccessToken, setJellyfinDomain, setJellyfinUser } from '@/utils/slices/book-provider-slice';
 import { initializeSleepTimer, setInitialized } from '@/utils/slices/audio-player-slice';
 import { SQLiteProvider, useSQLiteContext } from 'expo-sqlite';
 import { getAppOption, migrateDbIfNeeded, setAppOption } from '@/utils/db/db';

@@ -1,5 +1,4 @@
 import Card from "@/components/molecules/Card";
-import { DropboxProvider } from "@/utils/book-providers/dropbox";
 import { PALETTE } from "@/utils/colors";
 import { BookProviderDb } from "@/utils/db/schema";
 import { Link } from "expo-router";

@@ -4,24 +4,14 @@ import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Image } from "expo-image";
-import TrackPlayer from "react-native-track-player";
+import TrackPlayer, { useActiveTrack } from "react-native-track-player";
 import { PALETTE } from "@/utils/colors";
 import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 import { PlayButton } from "../atoms/AudioControls";
 
 export default function GlobalAudioControls({ title }: { title: Playable }) {
 	const jellyfinProvider = useAppSelector(state => state.bookProvider);
-	const [activeTrack, setActiveTrack] = useState<any>();
-
-	useEffect(() => {
-		(async () => {
-			let track = await TrackPlayer.getActiveTrack();
-
-			if (track) {
-				setActiveTrack(track);
-			}
-		})().then(() => { });
-	}, []);
+	const activeTrack = useActiveTrack();
 
 	return (
 		<Link href="/player">

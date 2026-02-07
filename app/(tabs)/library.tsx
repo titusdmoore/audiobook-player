@@ -3,7 +3,7 @@ import { FlatList, StyleSheet, TouchableOpacity, View, Text, TextInput, ScrollVi
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import { authenticateUserByName, fetchAudiobooks, Item } from "@/utils/book-providers/jellyfin";
 import { setAccessToken, setJellyfinUser } from "@/utils/slices/book-provider-slice";
-import { useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { Storage } from "expo-sqlite/kv-store";
 import { getAppOption } from "@/utils/db/db";
 import { useSQLiteContext } from "expo-sqlite";
@@ -89,13 +89,12 @@ export default function Tab() {
       }}
     >
       <View style={styles.inputContainer}>
-        <TextInput
+        <Link
           style={styles.input}
-          placeholderTextColor={PALETTE.textOffWhite}
-          placeholder="Search your library..."
-          value={searchInput}
-          onChangeText={setSearchInput}
-        />
+          href={{ pathname: '/search', params: { shouldFocus: 'true' } }}
+        >
+          <Text style={{ color: PALETTE.textOffWhite }}>Search your library...</Text>
+        </Link>
         <FontAwesome6Pro name="magnifying-glass" iconStyle="solid" size={16} color={PALETTE.textOffWhite} style={styles.inputIcon} />
       </View>
       <View style={{ height: 60 }}>
@@ -195,7 +194,7 @@ const styles = StyleSheet.create({
     width: '100%',
     color: PALETTE.textWhite,
     borderRadius: 10,
-    borderColor: '#252530',
+    borderColor: PALETTE.grey,
     borderWidth: 1,
   },
   inputIcon: {

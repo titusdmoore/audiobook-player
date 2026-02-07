@@ -13,6 +13,7 @@ import { useAppDispatch } from "@/utils/hooks";
 import { setSleepTimer as setStoreSleepTimer } from "@/utils/slices/book-provider-slice";
 import AdditionalControlsButton from "../atoms/AdditionalControlsButton";
 import { initializeSleepTimer } from "@/utils/slices/audio-player-slice";
+import Button from "../atoms/Button";
 // import { useTrackPlayerEvents, Event, State } from "react-native-track-player";
 
 
@@ -58,39 +59,55 @@ export default function AdditionalTrackActions() {
 		});
 	}, []);
 
+	const debugPlayer = async () => {
+		console.log("before")
+		let queue = await TrackPlayer.getQueue();
+		console.log(queue);
+		console.log(queue.length);
+		console.log(await TrackPlayer.getActiveTrackIndex());
+		console.log('after')
+	};
+
 	return (
-		<View style={styles.additionalControlsContainer}>
-			<AdditionalControlsButton
-				icon='gauge-high'
-				name='Speed'
-				valueText={playbackRate.toFixed(2).toString() + 'x'}
-				onPress={() => setPlaybackRateModalIsOpen(!playbackRateModalIsOpen)}
-			/>
-			<AdditionalControlsButton
-				icon='moon'
-				name='Timer'
-				valueText='Off'
-				onPress={() => setSleepTimerModalOpen(!sleepTimerModalOpen)}
-			/>
-			<AdditionalControlsButton
-				icon='bookmark'
-				name='Bookmark'
-				valueText='Save'
-				onPress={() => { }}
-			/>
-			<PlaybackRateControlsModal
-				playbackRate={playbackRate}
-				setPlaybackRate={setPlaybackRate}
-				isOpen={playbackRateModalIsOpen}
-				setIsOpen={setPlaybackRateModalIsOpen}
-			/>
-			<SleepTimerControlsModal
-				sleepTimer={sleepTimer}
-				setSleepTimer={setSleepTimer}
-				isOpen={sleepTimerModalOpen}
-				setIsOpen={setSleepTimerModalOpen}
-			/>
-		</View>
+		<>
+			<View style={styles.additionalControlsContainer}>
+				<AdditionalControlsButton
+					icon='gauge-high'
+					name='Speed'
+					valueText={playbackRate.toFixed(2).toString() + 'x'}
+					onPress={() => setPlaybackRateModalIsOpen(!playbackRateModalIsOpen)}
+				/>
+				<AdditionalControlsButton
+					icon='moon'
+					name='Timer'
+					valueText='Off'
+					onPress={() => setSleepTimerModalOpen(!sleepTimerModalOpen)}
+				/>
+				<AdditionalControlsButton
+					icon='bookmark'
+					name='Bookmark'
+					valueText='Save'
+					onPress={() => { }}
+				/>
+				<PlaybackRateControlsModal
+					playbackRate={playbackRate}
+					setPlaybackRate={setPlaybackRate}
+					isOpen={playbackRateModalIsOpen}
+					setIsOpen={setPlaybackRateModalIsOpen}
+				/>
+				<SleepTimerControlsModal
+					sleepTimer={sleepTimer}
+					setSleepTimer={setSleepTimer}
+					isOpen={sleepTimerModalOpen}
+					setIsOpen={setSleepTimerModalOpen}
+				/>
+			</View>
+			<View style={{ marginTop: 12 }}>
+				<Button onPress={async () => await debugPlayer()}>
+					<Text>Debug</Text>
+				</Button>
+			</View>
+		</>
 	);
 }
 

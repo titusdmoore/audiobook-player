@@ -1,5 +1,5 @@
 import PlaybackControls from "@/components/molecules/PlaybackControls";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Directory, Paths, File } from "expo-file-system";
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,6 +16,7 @@ import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 import { getPlayableById } from "@/utils";
 import { useSelector } from "react-redux";
 import useRemainingSleepTime from "@/utils/hooks/useRemainingSleepTime";
+import { useFocusEffect } from "expo-router";
 
 export function TitleImage({ activeTitle }: { activeTitle: Playable | null }) {
   const { width } = useWindowDimensions();
@@ -59,7 +60,6 @@ export function PlayerHeader({ navigation, route, options, back }: any) {
 }
 
 export default function Modal() {
-  const downloadableUrl = "https://www.dropbox.com/scl/fi/qfznbgt45q9xhfvk5zr6q/Reforming-Marriage-B0DTLF3Y45-03-Introduction.m4b?rlkey=9o4lyhguz4gotsri5rnyr1fp2&e=1&st=51erbmbw&dl=1"
   const fileDest = new Directory(Paths.document, "Audiobooks");
   const audioPlayer = useAppSelector(state => state.audioPlayer);
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
@@ -73,6 +73,21 @@ export default function Modal() {
     accessToken: jellyfinProvider.jellyfinAccessToken ?? '',
     userId: jellyfinProvider.jellyfinUser?.Id
   };
+
+  /* useFocusEffect((
+    useCallback(() => {
+      (async () => {
+        if (activeTrack) {
+          console.log('hello, world', activeTrack)
+          let titlePlayableRes = await getPlayableById(activeTrack?.parentItemId as string, jellyConfig, db)
+          setTitlePlayable(titlePlayableRes);
+
+          let chapterPlayableRes = await getPlayableById(activeTrack?.id, jellyConfig, db)
+          setChapterPlayable(chapterPlayableRes);
+        }
+      })().then(() => { });
+    }, [activeTrack])
+  )); */
 
   useEffect(() => {
     (async () => {
