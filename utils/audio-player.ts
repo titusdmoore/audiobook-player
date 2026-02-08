@@ -1,4 +1,10 @@
 import TrackPlayer, { Event, PlaybackActiveTrackChangedEvent, PlaybackProgressUpdatedEvent, PlaybackState, State } from "react-native-track-player";
+import { fetchPlayerDuration, setAppOption } from "./db/db";
+import { SQLiteDatabase } from "expo-sqlite";
+import { setActiveTitle } from "./slices/audio-player-slice";
+import { router } from "expo-router";
+import { Playable } from "./classes/playable";
+import { fetchChildrenPlayables, FetchItemOptions, getPlayableById } from ".";
 
 // export async function getCurrentTrackPlayer(): TrackPlayer {
 //
@@ -78,8 +84,32 @@ export async function setTrackPlaybackRate(playbackRate: number) {
 	await TrackPlayer.setRate(playbackRate);
 }
 
+function parseDisplayTimeSegments(time: number): number[] {
+	let timeComponents = [];
+	let timeShadow = time;
+
+	while (true) {
+		if (timeShadow >= 60) {
+			timeComponents.push(timeShadow % 60);
+			timeShadow = Math.floor(timeShadow / 60);
+			continue;
+		}
+
+		timeComponents.push(timeShadow);
+		break;
+	}
+
+
+	return timeComponents.reverse();
+}
+function displayTimeSegments(timeSegments: number[]): string {
+	let shadowedTimeSegments = timeSegments.length <= 1 ? ["00", ...timeSegments] : timeSegments;
+
+	return shadowedTimeSegments.map((segment, index) => ((index !== 0) ? segment.toString().padStart(2, "0") : segment)).join(":");
+}
+
 export function formatAudioProgressTime(time: number): string {
-	return Math.floor(time / 60).toString() + ":" + Math.floor(time % 60).toString().padStart(2, '0');
+	return displayTimeSegments(parseDisplayTimeSegments(time));
 }
 
 export function runTimeTicksToDuration(ticks: number): number {
@@ -88,3 +118,41 @@ export function runTimeTicksToDuration(ticks: number): number {
 
 	return seconds;
 }
+
+export type loadTracksOptionalParameters = {
+	startChapterIndex?: number,
+	chapterList?: Playable[],
+	afterLoadCallback?: CallableFunction,
+}
+export async function loadTracksForTitle(db: SQLiteDatabase, titleId: string, jellyConfig: FetchItemOptions, optionalParams: loadTracksOptionalParameters) {
+	await TrackPlayer.reset();
+	let chapters: Playable[] = [];
+	let shadowedStartIndex = optionalParams.startChapterIndex ?? 0;
+
+	if (optionalParams.hasOwnProperty('chapterList')) {
+		chapters = optionalParams.chapterList!;
+	} else {
+		let playableRes = await getPlayableById(titleId as string, jellyConfig, db)
+
+		if (playableRes) {
+			chapters = await fetchChildrenPlayables(playableRes, db, jellyConfig);
+		}
+	}
+
+	if (!optionalParams.startChapterIndex) {
+		let duration = await fetchPlayerDuration(db, titleId as string);
+		if (duration) {
+			shadowedStartIndex = chapters.findIndex((chapter) => chapter.id == duration.chapter_id);
+		}
+	}
+
+	for (const chapter of chapters.slice(shadowedStartIndex)) {
+		let track = chapter.toTrack();
+		await TrackPlayer.add(track);
+	}
+
+	await setAppOption(db, "new_title_loaded", "true");
+
+	if (optionalParams.afterLoadCallback) optionalParams.afterLoadCallback();
+	router.navigate("/player");
+};

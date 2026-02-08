@@ -124,9 +124,6 @@ export async function fetchAudiobooks(domain: string, accessToken: string, optio
 		...options
 	};
 
-	console.log("params", encodeObjectToQueryParams(mergedOptions))
-	console.log(accessToken)
-
 	let response = await fetch(`${domain}/Items?${encodeObjectToQueryParams(mergedOptions)}`, {
 		method: 'GET',
 		headers: new Headers({

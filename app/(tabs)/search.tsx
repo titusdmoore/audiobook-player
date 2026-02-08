@@ -11,7 +11,7 @@ import { useFocusEffect, useLocalSearchParams, router } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useRef, useState } from "react";
 import { Text, TextInput, View, StyleSheet, ScrollView, TouchableOpacity, TextInputComponent, FlatList } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Tab() {
   const [searchInput, setSearchInput] = useState<string>("");
@@ -23,7 +23,7 @@ export default function Tab() {
   const inputRef = useRef<TextInput | null>(null);
   const db = useSQLiteContext();
   const { shouldFocus } = useLocalSearchParams();
-  const { bottom } = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
 
   let jellyConfig = {
     domain: jellyfinProvider.jellyfinDomain ?? '',
@@ -32,6 +32,10 @@ export default function Tab() {
   };
 
   const handleSearch = async () => {
+    console.log('hitting here (dumb state)')
+    if (searchInput == '') return;
+    console.log('after')
+
     const audiobooksRes = await fetchAudiobooks(jellyConfig.domain, jellyConfig.accessToken, {
       searchTerm: searchInput,
       includeItemTypes: ['Folder'],
@@ -88,7 +92,9 @@ export default function Tab() {
   }, []);
 
   return (
-    <View style={[styles.searchContainer, { paddingBottom: bottom }]}>
+    <View style={[styles.searchContainer, {
+      flex: 1,
+    }]}>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -166,11 +172,11 @@ export default function Tab() {
         </View>
       )}
       {audiobooks.length > 0 && (
-        <View>
+        <View style={{ flex: 1 }}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{audiobooks.length} results found</Text>
             <TouchableOpacity style={styles.sectionActionButton}>
-              <FontAwesome6Pro name="bars-sort" color={PALETTE.textOffWhite} iconStyle="solid" size={14} />
+              <FontAwesome6Pro name="arrow-down-wide-short" color={PALETTE.primary} iconStyle="solid" size={14} />
               <Text style={styles.sectionActionButtonText}>Sort</Text>
             </TouchableOpacity>
           </View>
@@ -178,6 +184,7 @@ export default function Tab() {
             data={audiobooks}
             style={{
               gap: 12,
+              flex: 1
             }}
             onEndReachedThreshold={.7}
             renderItem={(props) => (<TitleListCardHorizontal {...props} />)}
@@ -261,6 +268,9 @@ const styles = StyleSheet.create({
     fontWeight: 500,
   },
   sectionActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6
   },
   sectionActionButtonText: {
     color: PALETTE.primary

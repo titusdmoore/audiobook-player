@@ -76,7 +76,7 @@ function AppInitializer() {
         dispatch(setInitialized(true));
 
         TrackPlayer.updateOptions(({
-          progressUpdateEventInterval: 3,
+          progressUpdateEventInterval: 1,
           capabilities: [
             Capability.Play,
             Capability.Pause,

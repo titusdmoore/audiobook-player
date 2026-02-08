@@ -10,5 +10,5 @@ export default function useRemainingSleepTime(endTime: number | null): number {
 		return () => clearInterval(interval);
 	}, [endTime]);
 
-	return Math.max(0, Math.floor((endTime - now) / 1000));
+	return Math.max(0, Math.round((endTime - now) / 1000));
 }

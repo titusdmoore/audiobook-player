@@ -39,9 +39,32 @@ export const PlaybackService = async () => {
     // if (seekChangedDueToDuration) { seekChangedDueToDuration = false; }
   });
   TrackPlayer.addEventListener(Event.PlaybackProgressUpdated, async (event: PlaybackProgressUpdatedEvent) => {
-    let trackObject = await TrackPlayer.getTrack(event.track);
-    let duration = await fetchPlayerDuration(db, trackObject?.parentItemId);
+    /*
+     *
+     * RUNS EVERY 3 SECONDS
+     *
+     */
+    if (event.position % 3 == 0) {
+      let trackObject = await TrackPlayer.getTrack(event.track);
+      let duration = await fetchPlayerDuration(db, trackObject?.parentItemId);
 
+      if (!duration) {
+        await createTitleDuration(db, {
+          position: Math.floor(event.position),
+          title_id: trackObject?.parentItemId,
+          chapter_id: trackObject?.id,
+        });
+        return;
+      }
+
+      await updateTitleDuration(db, duration.id!, trackObject?.id, Math.floor(event.position));
+    }
+
+    /*
+     *
+     * RUNS EVERY SECOND
+     *
+     */
     let sleepTimerResult = await getAppOption(db, 'sleep_timer');
     if (sleepTimerResult && sleepTimerResult.option_value) {
       let currentDate = new Date();
@@ -51,16 +74,5 @@ export const PlaybackService = async () => {
         await setAppOption(db, "sleep_timer", "");
       }
     }
-
-    if (!duration) {
-      await createTitleDuration(db, {
-        position: Math.floor(event.position),
-        title_id: trackObject?.parentItemId,
-        chapter_id: trackObject?.id,
-      });
-      return;
-    }
-
-    await updateTitleDuration(db, duration.id!, trackObject?.id, Math.floor(event.position));
   });
 };

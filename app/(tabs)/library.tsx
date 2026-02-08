@@ -15,6 +15,7 @@ import { Playable } from "@/utils/classes/playable";
 
 export default function Tab() {
   const [booksJelly, setBooksJelly] = useState<any[]>([]);
+  const [totalBooks, setTotalBooks] = useState<number>(0);
   const jellyfinProvider = useAppSelector(state => state.bookProvider);
   const dispatch = useAppDispatch();
   const { searchTerm } = useLocalSearchParams();
@@ -46,11 +47,12 @@ export default function Tab() {
 
   useEffect(() => {
     (async () => {
-      // console.log('local', local);
       let booksResponse = await fetchAudiobooks(jellyfinProvider.jellyfinDomain ?? '', jellyfinProvider.jellyfinAccessToken ?? '', searchTerm ? { searchTerm: searchTerm as string } : {});
 
       if (booksResponse && booksResponse.ok) {
         let parsedResponse = await booksResponse.json();
+
+        setTotalBooks(parsedResponse.TotalRecordCount);
 
         let playables: Playable[] = await Promise.all(parsedResponse.Items.map(async (item: Item) => await getPlayableById(item.Id, jellyConfig, db)));
         playables = playables.filter((item) => item);
@@ -124,7 +126,7 @@ export default function Tab() {
       <View style={{ marginBottom: 12 }}>
         <View style={styles.infoItemsContainer}>
           <View style={styles.infoContainer}>
-            <Text style={styles.infoValue}>24</Text>
+            <Text style={styles.infoValue}>{totalBooks}</Text>
             <Text style={styles.infoLabel}>Total Books</Text>
           </View>
           <View style={styles.infoContainer}>

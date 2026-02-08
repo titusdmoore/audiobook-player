@@ -4,8 +4,30 @@ import { Link } from "expo-router";
 import { Image } from "expo-image";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
+import { useSQLiteContext } from "expo-sqlite";
+import { loadTracksForTitle } from "@/utils/audio-player";
+import { setActiveTitle } from "@/utils/slices/audio-player-slice";
+import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 
 export default function TitleListCardHorizontal({ index, item }: { index: number, item: Playable }) {
+	const db = useSQLiteContext();
+	const dispatch = useAppDispatch();
+	const jellyfinProvider = useAppSelector(state => state.bookProvider);
+	const jellyConfig = {
+		domain: jellyfinProvider.jellyfinDomain ?? '',
+		accessToken: jellyfinProvider.jellyfinAccessToken ?? '',
+		userId: jellyfinProvider.jellyfinUser?.Id
+	};
+
+	const handlePlayClick = async () => await loadTracksForTitle(
+		db,
+		item.id,
+		jellyConfig,
+		{
+			afterLoadCallback: () => dispatch(setActiveTitle({ name: item.name, imagePath: item.imagePath })),
+		}
+	);
+
 	return (
 		<View style={styles.container} key={index}>
 			<Link href={{
@@ -26,7 +48,7 @@ export default function TitleListCardHorizontal({ index, item }: { index: number
 								<Text style={{ color: PALETTE.text, fontSize: 12 }}>12h 10m</Text>
 							</View>
 						</View>
-						<TouchableOpacity style={styles.playButton}>
+						<TouchableOpacity style={styles.playButton} onPress={handlePlayClick}>
 							<FontAwesome6Pro name="play" iconStyle="solid" size={15} color={PALETTE.textWhite} />
 						</TouchableOpacity>
 					</View>

@@ -11,7 +11,7 @@ import { setActiveTitle } from "@/utils/slices/audio-player-slice";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { /* callableWithDb, */ fetchPlayerDuration, setAppOption } from "@/utils/db/db";
 import { useSQLiteContext } from "expo-sqlite";
-import { formatAudioProgressTime } from "@/utils/audio-player";
+import { formatAudioProgressTime, loadTracksForTitle } from "@/utils/audio-player";
 import { Image } from "expo-image";
 import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 import { encodeObjectToQueryParams, getPlayableById, fetchChildrenPlayables } from "@/utils";
@@ -60,6 +60,16 @@ export default function TitleView() {
     userId: jellyfinProvider.jellyfinUser?.Id
   };
 
+  const handlePlayClick = async () => await loadTracksForTitle(
+    db,
+    titleId as string,
+    jellyConfig,
+    {
+      chapterList: chapters,
+      afterLoadCallback: () => dispatch(setActiveTitle({ name: playable?.name, imagePath: playable?.imagePath })),
+    }
+  );
+
   const handleDowloadTitleClick = async () => {
     setIsDownloading(true);
     await downloadTitle(db, jellyfinProvider.jellyfinDomain ?? '', jellyfinProvider.jellyfinAccessToken ?? '', jellyfinProvider.jellyfinUser?.Id, titleId as string)
@@ -68,43 +78,6 @@ export default function TitleView() {
     setPlayable(playableRes);
     setIsDownloading(false);
     // when completed, update db download thingy
-  };
-
-  const loadTracksForTitle = async (startChapterIndex?: number) => {
-    await TrackPlayer.reset();
-
-
-    if (!startChapterIndex) {
-      let duration = await fetchPlayerDuration(db, titleId as string);
-      if (duration) {
-        startChapterIndex = chapters.findIndex((chapter) => chapter.id == duration.chapter_id);
-      } else {
-        startChapterIndex = 0;
-      }
-    }
-
-    for (const chapter of chapters.slice(startChapterIndex)) {
-      // let track: Track = {
-      //   id: chapter.Id,
-      //   url: `${jellyfinProvider.jellyfinDomain}/Audio/${chapter.Id}/universal?TranscodingProtocol=hls&Container=m4b`,
-      //   headers: {
-      //     'Authorization': `MediaBrowser Token="${jellyfinProvider.jellyfinAccessToken}"`
-      //   },
-      //   title: chapter.Name,
-      //   artist: chapter.AlbumArtist,
-      //   // type: TrackType.HLS,
-      //   pitchAlgorithm: PitchAlgorithm.Voice,
-      //   duration: runTimeTicksToDuration(chapter.RunTimeTicks),
-      //   parentItemId: titleId,
-      // };
-      //
-      let track = chapter.toTrack();
-      await TrackPlayer.add(track);
-    }
-
-    await setAppOption(db, "new_title_loaded", "true");
-    dispatch(setActiveTitle({ name: playable?.name, imagePath: playable?.imagePath }));
-    router.navigate("/player");
   };
 
   useLayoutEffect(() => {
@@ -150,7 +123,7 @@ export default function TitleView() {
             </View>
           </View>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={[styles.buttonRoot, styles.playTitleButton]} onPress={() => loadTracksForTitle()}>
+            <TouchableOpacity style={[styles.buttonRoot, styles.playTitleButton]} onPress={handlePlayClick}>
               <FontAwesome6Pro name="play" iconStyle="solid" size={15} color={PALETTE.text} />
               <Text style={styles.playTitleButtonText}>Play Now</Text>
             </TouchableOpacity>

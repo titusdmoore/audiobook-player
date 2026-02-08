@@ -3,17 +3,18 @@ import { useEffect, useState } from "react";
 import { View, Text, Modal, StyleSheet, TouchableOpacity } from "react-native";
 import PlaybackRateControlsModal from "../atoms/PlaybackRateControlsModal";
 import { setTrackPlaybackRate } from "@/utils/audio-player";
-import TrackPlayer from "react-native-track-player";
+import TrackPlayer, { State, usePlaybackState } from "react-native-track-player";
 import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 import SleepTimerControlsModal from "../atoms/SleepTimerControlsModal";
 import { useSQLiteContext } from "expo-sqlite";
 import { getAppOption, setAppOption } from "@/utils/db/db";
 import moment from "moment";
-import { useAppDispatch } from "@/utils/hooks";
+import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import { setSleepTimer as setStoreSleepTimer } from "@/utils/slices/book-provider-slice";
 import AdditionalControlsButton from "../atoms/AdditionalControlsButton";
 import { initializeSleepTimer } from "@/utils/slices/audio-player-slice";
 import Button from "../atoms/Button";
+import useRemainingSleepTime from "@/utils/hooks/useRemainingSleepTime";
 // import { useTrackPlayerEvents, Event, State } from "react-native-track-player";
 
 
@@ -26,10 +27,20 @@ export default function AdditionalTrackActions() {
 	const [sleepTimerModalOpen, setSleepTimerModalOpen] = useState<boolean>(false);
 	const db = useSQLiteContext();
 	const dispatch = useAppDispatch();
+	const playerState = usePlaybackState();
+	const endTime = useAppSelector(state => state.audioPlayer.sleepTimerEndTime);
 
 	useEffect(() => {
+		if (playerState.state == State.Paused && (!endTime || Date.now() >= endTime)) {
+			setSleepTimer(null);
+		}
+	}, [playerState])
+
+	useEffect(() => {
+		console.log('hello sleep timer', sleepTimer);
 		(async () => {
 			if (!sleepTimer) {
+				console.log('we have become a failure of all that is good on this planet')
 				await setAppOption(db, "sleep_timer", "");
 				dispatch(setStoreSleepTimer(undefined));
 				return;
@@ -38,6 +49,12 @@ export default function AdditionalTrackActions() {
 			var newDateObj = moment(new Date()).add(sleepTimer, 'm').toDate();
 			await setAppOption(db, "sleep_timer", newDateObj.getTime().toString());
 			dispatch(initializeSleepTimer(newDateObj.getTime()));
+
+			console.log('just checking', newDateObj, Date.now(), newDateObj.getMilliseconds() - Date.now())
+			// setTimeout(() => {
+			// 	console.log('can I just not program?')
+			// 	setSleepTimer(null);
+			// }, (newDateObj.getTime() - Date.now()) + 100);
 		})().then(() => { });
 	}, [sleepTimer]);
 
@@ -80,7 +97,7 @@ export default function AdditionalTrackActions() {
 				<AdditionalControlsButton
 					icon='moon'
 					name='Timer'
-					valueText='Off'
+					valueText={sleepTimer ? sleepTimer + 'm' : 'Off'}
 					onPress={() => setSleepTimerModalOpen(!sleepTimerModalOpen)}
 				/>
 				<AdditionalControlsButton
@@ -102,11 +119,15 @@ export default function AdditionalTrackActions() {
 					setIsOpen={setSleepTimerModalOpen}
 				/>
 			</View>
+			{ /*
+
 			<View style={{ marginTop: 12 }}>
 				<Button onPress={async () => await debugPlayer()}>
 					<Text>Debug</Text>
 				</Button>
 			</View>
+
+			*/ }
 		</>
 	);
 }
