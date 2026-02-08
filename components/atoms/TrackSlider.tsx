@@ -12,7 +12,7 @@ export default function TrackSlider() {
 
 	return (
 		<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-			<Text style={{ color: PALETTE.text }}>{formatAudioProgressTime(progress.position)}</Text>
+			<Text style={{ color: PALETTE.text }}>{formatAudioProgressTime(Math.round(progress.position))}</Text>
 			<Slider
 				style={{ width: width * .70, height: 50, margin: 'auto' }}
 				minimumValue={0}

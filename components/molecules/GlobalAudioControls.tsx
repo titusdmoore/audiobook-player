@@ -15,8 +15,8 @@ export default function GlobalAudioControls({ title }: { title: Playable }) {
 
 	return (
 		<Link href="/player">
-			<View style={{ width: '100%', backgroundColor: PALETTE.backgroundLight, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10 }}>
-				<View style={{ flexDirection: 'row', gap: 12, alignItems: 'center', justifyContent: 'center' }}>
+			<View style={{ backgroundColor: PALETTE.backgroundLight, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10 }}>
+				<View style={{ flexDirection: 'row', gap: 12, alignItems: 'center', justifyContent: 'flex-start', flex: 1 }}>
 					<Image source={title.imagePath} style={{ width: 70, height: 70, borderRadius: 10 }} />
 					<View style={{ maxWidth: '70%' }}>
 						<Text style={{ color: PALETTE.text, fontSize: 16 }}>{title.name}</Text>

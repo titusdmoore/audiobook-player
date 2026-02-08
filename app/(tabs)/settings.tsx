@@ -2,7 +2,7 @@ import Card from "@/components/molecules/Card";
 import { PALETTE } from "@/utils/colors";
 import { BookProviderDb } from "@/utils/db/schema";
 import { Link } from "expo-router";
-import { authenticateUserByName } from "@/utils/book-providers/jellyfin";
+import { authenticateUserByName, fetchAudiobooks } from "@/utils/book-providers/jellyfin";
 import { useSQLiteContext } from "expo-sqlite";
 import { View, Text, StyleSheet, TouchableOpacity, Button, TextInput, ScrollView, Switch } from "react-native";
 import { setAccessToken, setJellyfinDomain, setJellyfinUser } from "@/utils/slices/book-provider-slice";

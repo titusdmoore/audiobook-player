@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     elevation: 10,
     zIndex: 99,
     left: '50%',
-    transform: 'translateX(-135%)',
+    transform: 'translateX(-134%)',
   },
   sleepTimerText: {
     color: PALETTE.text,

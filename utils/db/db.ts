@@ -157,6 +157,9 @@ export async function addBookChapter(db: SQLiteDatabase, data: BookChapterDb) {
 export async function fetchPlayerDuration(db: SQLiteDatabase, titleId: string): Promise<JellyfinBookProgressDb | null> {
 	return await db.getFirstAsync('SELECT * FROM jellyfin_book_progress WHERE title_id = ?;', titleId)
 }
+export async function _debugProgress(db: SQLiteDatabase): Promise<JellyfinBookProgressDb[] | null> {
+	return await db.getAllAsync('SELECT * FROM jellyfin_book_progress;')
+}
 
 export async function createTitleDuration(db: SQLiteDatabase, data: JellyfinBookProgressDb) {
 	return await db.runAsync(
