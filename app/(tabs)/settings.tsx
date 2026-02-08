@@ -255,6 +255,20 @@ export default function Tab() {
         </View>
       </View>
       <View style={styles.sectionContainer}>
+        <Text style={styles.sectionTitle}>Audiobook Containers</Text>
+        <View style={[styles.sectionCard, { padding: 12 }]}>
+          <View style={styles.storageInfoContainer}>
+            <View>
+              <Text style={styles.storageTitle}>Selected Containers</Text>
+            </View>
+            <Text style={styles.storageAmount}>3 Containers</Text>
+          </View>
+          <TouchableOpacity style={styles.storageButton}>
+            <Text style={styles.storageButtonText}>Add Audiobook Container</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>Storage</Text>
         <View style={[styles.sectionCard, { padding: 12 }]}>
           <View style={styles.storageInfoContainer}>
