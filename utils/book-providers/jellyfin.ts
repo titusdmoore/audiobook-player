@@ -42,7 +42,7 @@ export async function authenticateUserByName(domain: string, username: string, p
 			headers: new Headers({
 				'accept': 'application/json',
 				'Content-Type': 'application/json',
-				'x-emby-authorization': 'Mediabrowser Client="audiobook-player", Device="mydevice", DeviceId="myid", Version="1.0.0"'
+				'x-emby-authorization': 'Mediabrowser Client="audifin", Device="mydevice", DeviceId="myid", Version="1.0.0"'
 			}),
 		});
 
@@ -262,7 +262,7 @@ export async function searchForBooks(searchTerm: string, domain: string, accessT
 		headers: new Headers({
 			'accept': 'application/json',
 			'Content-Type': 'application/json',
-			'x-emby-authorization': 'Mediabrowser Client="audiobook-player", Device="mydevice", DeviceId="myid", Version="1.0.0"'
+			'x-emby-authorization': 'Mediabrowser Client="audifin", Device="mydevice", DeviceId="myid", Version="1.0.0"'
 		}),
 	});
 }
