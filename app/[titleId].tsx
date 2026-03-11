@@ -18,6 +18,9 @@ import { encodeObjectToQueryParams, getPlayableById, fetchChildrenPlayables } fr
 import { Playable } from "@/utils/classes/playable";
 import Slider from "@react-native-community/slider";
 import ProgressBar from "@/components/molecules/ProgresBar";
+import ChapterListItem from "@/components/atoms/ChapterListItem";
+import { scaleZetaToMatchClamps } from "react-native-reanimated/lib/typescript/animation/spring";
+import ChaptersListModal from "@/components/molecules/ChaptersListModal";
 
 
 export default function TitleView() {
@@ -204,22 +207,9 @@ export default function TitleView() {
           </View>
           <View style={styles.chaptersContainer}>
             {chapters.slice(0, 5).map((chapter, index) => (
-              <View style={styles.chapterContainer} key={index}>
-                <View style={{ width: 40, height: 40, backgroundColor: PALETTE.background, borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
-                  <Text style={{ color: PALETTE.textOffWhite, fontSize: 18, fontFamily: 'Inter_400Regular' }}>{index + 1}</Text>
-                </View>
-                <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 12, alignItems: 'center' }}>
-                  <View style={{ maxWidth: '75%' }}>
-                    <Text style={{ fontFamily: 'Inter_400Regular', color: PALETTE.textWhite, fontSize: 14, wordWrap: 'break-word' }} numberOfLines={2}>{chapter.name}</Text>
-                    <Text style={{ fontFamily: 'Inter_300Light', color: PALETTE.textOffWhite, }}>{formatAudioProgressTime(chapter.getDuration())}</Text>
-                  </View>
-                  <TouchableOpacity>
-                    <FontAwesome6Pro name='ellipsis-vertical' iconStyle="solid" size={20} color={PALETTE.textWhite} />
-                  </TouchableOpacity>
-                </View>
-              </View>
+              <ChapterListItem key={index} index={index} chapter={chapter} />
             ))}
-            <TouchableOpacity style={{ width: '100%', justifyContent: 'center', alignItems: 'center', padding: 16 }}>
+            <TouchableOpacity style={{ width: '100%', justifyContent: 'center', alignItems: 'center', padding: 16 }} onPress={() => setChaptersModalOpen(true)}>
               <Text style={{ fontFamily: 'Inter_400Regular', color: PALETTE.primary, fontSize: 14 }}>View All Chapters</Text>
             </TouchableOpacity>
           </View>
@@ -241,6 +231,7 @@ export default function TitleView() {
           </View>
         </View>
       </View>
+      <ChaptersListModal isOpen={chaptersModalOpen} setIsOpen={setChaptersModalOpen} chapters={chapters} />
     </ScrollView>
   );
 }

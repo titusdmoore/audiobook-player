@@ -41,16 +41,6 @@ export default function Tab() {
     userId: jellyfinProvider.jellyfinUser?.Id
   };
 
-  const handlePlayClick = async () => await loadTracksForTitle(
-    db,
-    item.id,
-    jellyConfig,
-    {
-      afterLoadCallback: () => dispatch(setActiveTitle({ name: item.name, imagePath: item.imagePath })),
-    }
-  );
-
-
   useEffect(() => {
     (async () => {
       let inProgressIdsDb = await db.getAllAsync('SELECT title_id FROM jellyfin_book_progress LIMIT 10;');

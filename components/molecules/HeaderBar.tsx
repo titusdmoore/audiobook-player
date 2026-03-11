@@ -23,7 +23,7 @@ export default function HeaderBar({ layout, options, route, navigation }: Bottom
 	return (
 		<View style={{ paddingTop: insets.top, height: 60 + insets.top }}>
 			<View style={{ flexDirection: 'row', alignItems: 'center', height: '100%', paddingHorizontal: 24, gap: 6 }}>
-				<Image source={require('../../assets/images/audifin.png')} style={{ height: 30, width: 35 }} />
+				{(options.title && options.title == 'Home') && (<Image source={require('../../assets/images/audifin.png')} style={{ height: 30, width: 35 }} />)}
 				<Text style={{ color: PALETTE.textWhite, fontSize: 20, fontWeight: '600' }}>{options.title == 'Home' ? 'Audifin' : options.title}</Text>
 			</View>
 		</View>
