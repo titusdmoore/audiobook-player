@@ -13,10 +13,13 @@ import { Playable } from "@/utils/classes/playable";
 import { getAppOption } from "@/utils/db/db";
 import { useSQLiteContext } from "expo-sqlite";
 import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
-import { getPlayableById } from "@/utils";
+import { fetchChildrenPlayables, getPlayableById } from "@/utils";
 import { useSelector } from "react-redux";
 import useRemainingSleepTime from "@/utils/hooks/useRemainingSleepTime";
 import { useFocusEffect } from "expo-router";
+import { BOOK_CHAPTERS_CREATE } from "@/utils/db/schema";
+import ChaptersListModal from "@/components/molecules/ChaptersListModal";
+import PlayerTitleAdditionalActionsModal from "@/components/molecules/PlayerTitleAdditionalActionsModal";
 
 export function TitleImage({ activeTitle }: { activeTitle: Playable | null }) {
   const { width } = useWindowDimensions();
@@ -42,19 +45,49 @@ export function TitleImage({ activeTitle }: { activeTitle: Playable | null }) {
 }
 
 export function PlayerHeader({ navigation, route, options, back }: any) {
+  const [playable, setPlayable] = useState<Playable | null>(null);
+  const [chapters, setChapters] = useState<Playable[]>([]);
+  const [chaptersListIsOpen, setChaptersListIsOpen] = useState<boolean>(false);
+  const [titleActionsIsOpen, setTitleActionsIsOpen] = useState<boolean>(false);
+  const activeTrack = useActiveTrack();
+  const jellyfinProvider = useAppSelector(state => state.bookProvider);
+  const db = useSQLiteContext();
+
+  let jellyConfig = {
+    domain: jellyfinProvider.jellyfinDomain ?? '',
+    accessToken: jellyfinProvider.jellyfinAccessToken ?? '',
+    userId: jellyfinProvider.jellyfinUser?.Id
+  };
+
+  useEffect(() => {
+    (async () => {
+      if (activeTrack) {
+        let playableRes = await getPlayableById(activeTrack.parentItemId, jellyConfig, db)
+        setPlayable(playableRes);
+
+        if (playableRes) {
+          let chapters = await fetchChildrenPlayables(playableRes, db, jellyConfig);
+          setChapters(chapters);
+        }
+      }
+    })().then(() => { });
+  }, [activeTrack]);
+
   return (
     <SafeAreaView style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 24, justifyContent: 'space-between' }}>
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
         <FontAwesome6Pro name="angle-down" iconStyle="solid" size={16} color={PALETTE.textWhite} />
       </TouchableOpacity>
       <View style={{ flexDirection: 'row', gap: 6 }}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
+        <TouchableOpacity onPress={() => setChaptersListIsOpen(true)} style={styles.headerButton}>
           <FontAwesome6Pro name="list" iconStyle="solid" size={16} color={PALETTE.textWhite} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
+        <TouchableOpacity onPress={() => setTitleActionsIsOpen(true)} style={styles.headerButton}>
           <FontAwesome6Pro name="ellipsis-vertical" iconStyle="solid" size={16} color={PALETTE.textWhite} />
         </TouchableOpacity>
       </View>
+      <ChaptersListModal isOpen={chaptersListIsOpen} setIsOpen={setChaptersListIsOpen} chapters={chapters} />
+      <PlayerTitleAdditionalActionsModal isOpen={titleActionsIsOpen} setIsOpen={setTitleActionsIsOpen} titleId={playable?.id ?? ''} />
     </SafeAreaView>
   );
 }
@@ -139,7 +172,7 @@ const styles = StyleSheet.create({
     color: PALETTE.textOffWhite,
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    marginBottom: 14
+    marginBottom: 7
   },
   chapterTitle: {
     color: PALETTE.textOffWhite,

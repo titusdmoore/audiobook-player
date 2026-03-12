@@ -1,8 +1,9 @@
 import { Playable } from "@/utils/classes/playable";
 import { PALETTE } from "@/utils/colors";
 import { Dispatch, SetStateAction } from "react";
-import { Modal, View, StyleSheet, Text, ScrollView } from "react-native";
+import { Modal, View, StyleSheet, Text, ScrollView, TouchableOpacity } from "react-native";
 import ChapterListItem from "../atoms/ChapterListItem";
+import FontAwesome6Pro from "@react-native-vector-icons/fontawesome6-pro";
 
 type ChaptersListModalProps = {
 	chapters: Playable[],
@@ -22,9 +23,12 @@ export default function ChaptersListModal({ chapters, isOpen, setIsOpen }: Chapt
 						<View>
 							<Text style={styles.headerText}>Chapters</Text>
 						</View>
+						<TouchableOpacity onPress={() => setIsOpen(false)}>
+							<FontAwesome6Pro name="x" iconStyle="solid" size={16} color={PALETTE.textWhite} />
+						</TouchableOpacity>
 					</View>
-					<View style={{ flex: 1 }}>
-						<ScrollView style={{}}>
+					<View style={{ width: '100%', height: '90%' }}>
+						<ScrollView style={{ paddingHorizontal: 6 }}>
 							{chapters.map((chapter, index) => (<ChapterListItem key={index} chapter={chapter} index={index} />))}
 						</ScrollView>
 					</View>
@@ -43,7 +47,8 @@ const styles = StyleSheet.create({
 		backgroundColor: 'rgba(10, 10, 15, .9)'
 	},
 	modalView: {
-		width: '80%',
+		width: '85%',
+		height: '75%',
 		margin: 20,
 		backgroundColor: PALETTE.backgroundLight,
 		borderRadius: 20,
