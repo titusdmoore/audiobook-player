@@ -155,7 +155,7 @@ export default function Tab() {
         }}
         onEndReached={fetchMoreBooks}
         onEndReachedThreshold={.7}
-        renderItem={(props) => (<TitleListCardHorizontal {...props} />)}
+        renderItem={(props) => (<TitleListCardHorizontal key={props.index} {...props} />)}
       />
     </View>
   );
